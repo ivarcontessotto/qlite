@@ -1,7 +1,7 @@
 package oracle.statements.result;
 
 import iam.IAMReader;
-import jota.model.Transaction;
+import org.iota.jota.model.Transaction;
 import oracle.statements.StatementReader;
 import oracle.statements.StatementType;
 import oracle.statements.hash.HashStatementReader;

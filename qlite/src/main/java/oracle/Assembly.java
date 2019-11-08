@@ -1,6 +1,6 @@
 package oracle;
 
-import jota.model.Transaction;
+import org.iota.jota.model.Transaction;
 import oracle.statements.StatementType;
 import oracle.statements.result.ResultStatement;
 import oracle.statements.StatementIAMIndex;

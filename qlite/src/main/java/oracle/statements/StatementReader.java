@@ -3,7 +3,7 @@ package oracle.statements;
 import exceptions.InvalidStatementException;
 import iam.IAMKeywordReader;
 import iam.IAMReader;
-import jota.model.Transaction;
+import org.iota.jota.model.Transaction;
 import oracle.statements.hash.HashStatement;
 import oracle.statements.result.ResultStatement;
 import org.json.JSONObject;

@@ -3,7 +3,7 @@ package iam;
 import iam.exceptions.CorruptIAMStreamException;
 import exceptions.IncompleteIAMChainException;
 import iam.signing.SignatureValidator;
-import jota.model.Transaction;
+import org.iota.jota.model.Transaction;
 import org.json.JSONObject;
 import tangle.TangleAPI;
 

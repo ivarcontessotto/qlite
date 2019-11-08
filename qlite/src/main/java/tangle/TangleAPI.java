@@ -1,15 +1,15 @@
 package tangle;
 
-import cfb.pearldiver.PearlDiverLocalPoW;
+import org.iota.jota.pow.pearldiver.PearlDiverLocalPoW;
 import exceptions.IotaAPICallFailedException;
-import jota.IotaAPI;
-import jota.dto.response.GetBalancesResponse;
-import jota.dto.response.SendTransferResponse;
-import jota.error.ArgumentException;
-import jota.model.Input;
-import jota.model.Transaction;
-import jota.model.Transfer;
-import jota.utils.TrytesConverter;
+import org.iota.jota.IotaAPI;
+import org.iota.jota.dto.response.GetBalancesResponse;
+import org.iota.jota.dto.response.SendTransferResponse;
+import org.iota.jota.error.ArgumentException;
+import org.iota.jota.model.Input;
+import org.iota.jota.model.Transaction;
+import org.iota.jota.model.Transfer;
+import org.iota.jota.utils.TrytesConverter;
 
 import java.security.InvalidParameterException;
 import java.util.HashMap;
@@ -74,7 +74,8 @@ public class TangleAPI {
 
         while (true) {
             try {
-                SendTransferResponse response = wrappedAPI.sendTransfer("", 1, 3, mwm, transfers, inputs, "", true, false);
+                SendTransferResponse response = wrappedAPI.sendTransfer("", 1, 3, mwm, transfers,
+                        inputs, "", true, false, null);
                 return response.getTransactions().get(0).getHash();
             } catch (ArgumentException e) {
                 e.printStackTrace();
@@ -97,7 +98,7 @@ public class TangleAPI {
     }
 
     public String sendMessage(String address, String message) {
-        return sendTrytes(address, TrytesConverter.toTrytes(message));
+        return sendTrytes(address, TrytesConverter.asciiToTrytes(message));
     }
 
     /**
@@ -148,7 +149,7 @@ public class TangleAPI {
             String trytes = tx.getSignatureFragments();
             trytes = trytes.split("99")[0];
             if(trytes.length()%2 == 1) trytes += "9";
-            String message = convert ? TrytesConverter.toString(trytes) : trytes;
+            String message = convert ? TrytesConverter.trytesToAscii(trytes) : trytes;
 
             map.put(tx.getHash(), message);
         }
@@ -157,7 +158,7 @@ public class TangleAPI {
 
     public String readTransactionMessage(String hash) {
         String transactionTrytes = readTransactionTrytes(hash);
-        return transactionTrytes != null ? TrytesConverter.toString(transactionTrytes) : null;
+        return transactionTrytes != null ? TrytesConverter.trytesToAscii(transactionTrytes) : null;
     }
 
     /**

@@ -3,8 +3,8 @@ package iam;
 import constants.TangleJSONConstants;
 import exceptions.IncompleteIAMChainException;
 import iam.exceptions.IllegalIAMPacketSizeException;
-import jota.model.Transaction;
-import jota.utils.TrytesConverter;
+import org.iota.jota.model.Transaction;
+import org.iota.jota.utils.TrytesConverter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import tangle.TangleAPI;
@@ -71,7 +71,7 @@ class IAMPacketFilter {
 
     private String collectFragments(Transaction rootTransaction) {
 
-        String baseTxMsg = TrytesConverter.toString(rootTransaction.getSignatureFragments().substring(0, TryteTool.TRYTES_PER_TRANSACTION_MESSAGE -1));
+        String baseTxMsg = TrytesConverter.trytesToAscii(rootTransaction.getSignatureFragments().substring(0, TryteTool.TRYTES_PER_TRANSACTION_MESSAGE -1));
         String[] split = baseTxMsg.split("\\{", 2);
         String hashBlock = split[0];
         String firstFragment = "{"+split[1];

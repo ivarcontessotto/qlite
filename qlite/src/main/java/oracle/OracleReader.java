@@ -1,7 +1,7 @@
 package oracle;
 
 import iam.exceptions.CorruptIAMStreamException;
-import jota.model.Transaction;
+import org.iota.jota.model.Transaction;
 import iam.IAMReader;
 import oracle.statements.*;
 import oracle.statements.hash.HashStatementReader;

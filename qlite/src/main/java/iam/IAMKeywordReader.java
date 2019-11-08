@@ -1,6 +1,6 @@
 package iam;
 
-import jota.model.Transaction;
+import org.iota.jota.model.Transaction;
 import org.json.JSONObject;
 
 import java.util.List;

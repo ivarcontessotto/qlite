@@ -1,12 +1,12 @@
 package tangle;
 
 import exceptions.IotaAPICallFailedException;
-import jota.IotaAPI;
-import jota.dto.response.SendTransferResponse;
-import jota.error.ArgumentException;
-import jota.model.Input;
-import jota.model.Transaction;
-import jota.model.Transfer;
+import org.iota.jota.IotaAPI;
+import org.iota.jota.dto.response.SendTransferResponse;
+import org.iota.jota.error.ArgumentException;
+import org.iota.jota.model.Input;
+import org.iota.jota.model.Transaction;
+import org.iota.jota.model.Transfer;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -56,7 +56,6 @@ public class WrappedIotaAPI extends IotaAPI {
         }
     }
 
-    @Override
     public SendTransferResponse sendTransfer(String seed, int security, int depth, int minWeightMagnitude, List<Transfer> transfers, List<Input> inputs, String remainderAddress, boolean validateInputs, boolean validateInputAddresses) throws ArgumentException {
         SendTransferResponse sendTransferResponse = null;
         for(int i = 0; i < throwableTolerance && sendTransferResponse == null; i++)
@@ -66,7 +65,7 @@ public class WrappedIotaAPI extends IotaAPI {
 
     private SendTransferResponse tryToSendTransfer(String seed, int security, int depth, int minWeightMagnitude, List<Transfer> transfers, List<Input> inputs, String remainderAddress, boolean validateInputs, boolean validateInputAddresses, boolean isLastTry) {
         try {
-            return super.sendTransfer(seed, security, depth, minWeightMagnitude, transfers, inputs, remainderAddress, validateInputs, validateInputAddresses);
+            return super.sendTransfer(seed, security, depth, minWeightMagnitude, transfers, inputs, remainderAddress, validateInputs, validateInputAddresses, null);
         } catch (Throwable t) {
             if(isLastTry) {
                 logThrowable(t);
