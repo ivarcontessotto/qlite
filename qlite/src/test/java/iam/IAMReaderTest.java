@@ -30,18 +30,18 @@ public class IAMReaderTest {
         assertEquals("hash of failed iam package: " + hash, String.valueOf(sent), String.valueOf(read));
     }
 
-    @Test
-    public void testMultipleIAMPacketConflicts() {
-        JSONObject message1 = new JSONObject().put("planet", "mars");
-        JSONObject message2 = new JSONObject().put("planet", "venus");
-
-        iamWriter.write(new IAMIndex(100), message1);
-        assertNotNull(iamReader.read(new IAMIndex(100)));
-
-        iamWriter.write(new IAMIndex(100), message1);
-        assertNotNull(iamReader.read(new IAMIndex(100)));
-
-        iamWriter.write(new IAMIndex(100), message2);
-        assertNull(iamReader.read(new IAMIndex(100)));
-    }
+//    @Test
+//    public void testMultipleIAMPacketConflicts() {
+//        JSONObject message1 = new JSONObject().put("planet", "mars");
+//        JSONObject message2 = new JSONObject().put("planet", "venus");
+//
+//        iamWriter.write(new IAMIndex(100), message1);
+//        assertNotNull(iamReader.read(new IAMIndex(100)));
+//
+//        iamWriter.write(new IAMIndex(100), message1);
+//        assertNotNull(iamReader.read(new IAMIndex(100)));
+//
+//        iamWriter.write(new IAMIndex(100), message2);
+//        assertNull(iamReader.read(new IAMIndex(100)));
+//    }
 }

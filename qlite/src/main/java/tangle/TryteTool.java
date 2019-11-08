@@ -2,16 +2,28 @@ package tangle;
 
 import iam.IAMStream;
 import org.apache.commons.lang3.StringUtils;
+import org.iota.jota.builder.AddressRequest;
 
 /**
  * @author microhash
  *
  * TryteTool is a collection of a few basic tryte functions which are needed frequently.
  * */
-public enum  TryteTool {
-    ;
+public class  TryteTool {
 
-    public static final String NINE_ADDRESS = StringUtils.repeat('9', 81);
+    public static final String TEST_SEED =
+            "SHYPXXS9WFWCPGXLSFWUGFSTZNJFOBKHCOOPWPUODUZ9MTUKSRQHETK99QGJYVURWDRDSNHCGGTOBZMRU";
+    public static final String TEST_ADDRESS_1 =
+            "AWAJCJXEHVOUVUIDUAIOAI9TJGZPOXZRJRDKRFXC9EREDDFJREJXGWUFSPKQYWCTBPJYVWTPUAYRZETUZCYNLGRINC";
+    public static final String TEST_ADDRESS_2 =
+            "OUVQWKMMWAFKYGFKCADJPXFWFG9STUFISYUSBH9GEUPJRQGJEURLJSVJKEQKYYAISZOSZWRJOAMFGCHBCHRZNIRRNA";
+    public static final String TEST_ADDRESS_3 =
+            "WUXMTARSYKMLONDNZZLKZMOLIHFKPDIXOKRLOYYKFFRLVQUYOISWBEDUSBJOVGYTDVFSYMJGGQTVBCU9BEIJKBSYMW";
+    public static final String TEST_ADDRESS_4 =
+            "GXKLUJD9WNJPJUADTAZSMACQLS9XMETDDQXUOIISCRQT9EK9AGJKXGNEBOSNLIHMIXMVZGPLBXJOCKXAYPMSLFNQUZ";
+    public static final String TEST_ADDRESS_5 =
+            "9JQJLEFYMO9ZJVQURAWLHZAMTMZBRHOGUTRBTVEJXESJKQOMWXZSENXDIYDOZPVTXCC9NCHQRXOXVQTYZRJYBMR9GD";
+
     public static final int TRYTES_PER_ADDRESS = 81;
     public static final int TRYTES_PER_HASH = 81;
     public static final int TRYTES_PER_BYTE = 2;

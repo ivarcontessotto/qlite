@@ -13,7 +13,7 @@ public abstract class IAMStream {
      * @return the address built
      * */
     public String buildAddress(IAMIndex index) {
-        return cutStreamID() + index;
+        return cutStreamID() + index + StringUtils.repeat('9', 9);
     }
 
     private String cutStreamID() {

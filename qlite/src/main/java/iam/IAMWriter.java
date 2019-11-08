@@ -27,10 +27,10 @@ public class IAMWriter extends IAMStream {
 
     private static final int MAX_CHARS_PER_FRAGMENT = TryteTool.TRYTES_PER_TRANSACTION_MESSAGE / TryteTool.TRYTES_PER_BYTE; // = BYTES PER TRANSACTION
 
-    /**
+    /***
      * Creates a new key pair and attaches the public key to the tangle.
      * The resulting transaction hash serves as ID for the IAM Stream.
-     * */
+     */
     public IAMWriter() {
         String publicKeyTrytes = signer.getPublicKeyTrytes();
         id = TangleAPI.getInstance().sendTrytes(publicKeyTrytes);
@@ -117,7 +117,7 @@ public class IAMWriter extends IAMStream {
         StringBuilder hashBlock = new StringBuilder();
 
         for(int i = fragments.length-1; i >= 1; i--) {
-            String hash = TangleAPI.getInstance().sendMessage(fragments[i]);
+            String hash = TangleAPI.getInstance().sendMessage(address, fragments[i]);
             hashBlock.insert(0, hash);
         }
 

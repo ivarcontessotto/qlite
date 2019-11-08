@@ -1,7 +1,7 @@
 package tangle;
 
+import org.iota.jota.connection.HttpConnector;
 import org.iota.jota.pow.pearldiver.PearlDiverLocalPoW;
-import exceptions.IotaAPICallFailedException;
 import org.iota.jota.IotaAPI;
 import org.iota.jota.dto.response.GetBalancesResponse;
 import org.iota.jota.dto.response.SendTransferResponse;
@@ -11,6 +11,7 @@ import org.iota.jota.model.Transaction;
 import org.iota.jota.model.Transfer;
 import org.iota.jota.utils.TrytesConverter;
 
+import java.net.MalformedURLException;
 import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -42,16 +43,22 @@ public class TangleAPI {
      * @param mwm         min weight magnitude (14 on mainnet, 9 on testnet)
      * @param localPow    TRUE: perform proof-of-work locally, FALSE: perform pow on remote iota node
      * */
-    public static void changeNode(NodeAddress nodeAddress, int mwm, boolean localPow) {
+    public static void changeNode(NodeAddress nodeAddress, int mwm, boolean localPow) throws MalformedURLException {
         instance = new TangleAPI(nodeAddress, mwm, localPow);
     }
 
     private TangleAPI(NodeAddress nodeAddress, int mwm, boolean localPow) {
 
-        IotaAPI.Builder builder = new IotaAPI.Builder()
-                .protocol(nodeAddress.getProtocol())
-                .host(nodeAddress.getHost())
-                .port(nodeAddress.getPort());
+        IotaAPI.Builder builder = new IotaAPI.Builder();
+
+        try {
+            builder.addNode(new HttpConnector(
+                    nodeAddress.getProtocol(),
+                    nodeAddress.getHost(),
+                    nodeAddress.getPort(), 500));
+        } catch (MalformedURLException e) {
+            throw new ArgumentException("Malformed node url.");
+        }
 
         if(localPow)
             builder.localPoW(new PearlDiverLocalPoW());
@@ -68,14 +75,13 @@ public class TangleAPI {
      * */
     public String sendTrytes(String address, String tryteMessage) {
 
-        List<Input> inputs = new LinkedList<>();
         List<Transfer> transfers = new LinkedList<>();
         transfers.add(new Transfer(address, 0, tryteMessage, TAG));
 
         while (true) {
             try {
                 SendTransferResponse response = wrappedAPI.sendTransfer("", 1, 3, mwm, transfers,
-                        inputs, "", true, false, null);
+                        null, null, true, false, null);
                 return response.getTransactions().get(0).getHash();
             } catch (ArgumentException e) {
                 e.printStackTrace();
@@ -90,11 +96,11 @@ public class TangleAPI {
     }
 
     public String sendTrytes(String tryteMessage) {
-        return sendTrytes(TryteTool.NINE_ADDRESS, tryteMessage);
+        return sendTrytes(TryteTool.TEST_ADDRESS_1, tryteMessage);
     }
 
     public String sendMessage(String message) {
-        return sendMessage(TryteTool.NINE_ADDRESS, message);
+        return sendMessage(TryteTool.TEST_ADDRESS_1, message);
     }
 
     public String sendMessage(String address, String message) {
