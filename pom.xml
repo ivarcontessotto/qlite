@@ -27,7 +27,6 @@
         </developer>
     </developers>
 
-
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
@@ -39,31 +38,6 @@
         <version.maven-javadoc-plugin>2.10.4</version.maven-javadoc-plugin>
         <version.maven-surefire-plugin>2.13</version.maven-surefire-plugin>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.iota</groupId>
-                <artifactId>jota</artifactId>
-                <version>0.9.11-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>20180130</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-slf4j-impl</artifactId>
-                <version>2.10.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-                <version>2.10.0</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <plugins>
