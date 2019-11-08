@@ -73,10 +73,12 @@ class IAMPacketFilter {
 
         String baseTxMsg = TrytesConverter.trytesToAscii(rootTransaction.getSignatureFragments().substring(0, TryteTool.TRYTES_PER_TRANSACTION_MESSAGE -1));
         String[] split = baseTxMsg.split("\\{", 2);
+
         String hashBlock = split[0];
+        String[] hashes = convertHashBlockToHashes(hashBlock);
+
         String firstFragment = "{"+split[1];
 
-        String[] hashes = convertHashBlockToHashes(hashBlock);
         if(hashes.length+1 > IAMStream.MAX_FRAGMENTS_PER_IAM_PACKET)
             throw new IllegalIAMPacketSizeException(rootTransaction.getHash());
         return firstFragment + fetchFragmentsFromHashes(hashes);

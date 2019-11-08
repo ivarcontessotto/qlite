@@ -20,6 +20,7 @@ public class TangleJSONConstants {
     public static final String RESULT_STATEMENT_NONCE = "nonce";
 
     // IAMStream
+    public static final String IAM_PACKET_HASHBLOCK = "hashblock";
     public static final String IAM_PACKET_MESSAGE = "content";
     public static final String IAM_PACKET_SIGNATURE = "signature";
 

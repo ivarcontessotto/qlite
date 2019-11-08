@@ -112,27 +112,29 @@ public class IAMWriter extends IAMStream {
     }
 
     private static String publishIAMPacketInFragments(String iamPacketString, String address) {
+        JSONObject hashBlockJason = new JSONObject();
+        hashBlockJason.put(TangleJSONConstants.IAM_PACKET_HASHBLOCK, "");
 
-        String[] fragments = fragmentIAMPacket(iamPacketString);
+        String[] fragments = fragmentIAMPacket(iamPacketString, hashBlockJason.toString().length());
         StringBuilder hashBlock = new StringBuilder();
 
         for(int i = fragments.length-1; i >= 1; i--) {
             String hash = TangleAPI.getInstance().sendMessage(address, fragments[i]);
             hashBlock.insert(0, hash);
         }
+        hashBlockJason.put(TangleJSONConstants.IAM_PACKET_HASHBLOCK, hashBlock.toString());
 
-        fragments[0] = hashBlock + fragments[0];
+        fragments[0] = hashBlockJason.toString() + fragments[0];
         return TangleAPI.getInstance().sendMessage(address, fragments[0]);
     }
 
-    private static String[] fragmentIAMPacket(String iamPacketString) {
-
-        int amountOfFragments = predictAmountOfFragments(iamPacketString.length());
+    private static String[] fragmentIAMPacket(String iamPacketString, int hashBlockMinLength) {
+        int amountOfFragments = predictAmountOfFragments(iamPacketString.length(), hashBlockMinLength);
 
         if(amountOfFragments > MAX_FRAGMENTS_PER_IAM_PACKET)
             throw new IAMPacketSizeLimitExceeded();
 
-        int hashBlockLength = TryteTool.TRYTES_PER_HASH * (amountOfFragments-1);
+        int hashBlockLength = hashBlockMinLength + TryteTool.TRYTES_PER_HASH * (amountOfFragments-1);
         String[] fragments = new String[amountOfFragments];
 
         fragments[0] = iamPacketString.substring(0, Math.min(iamPacketString.length(), MAX_CHARS_PER_FRAGMENT-hashBlockLength));
@@ -145,11 +147,11 @@ public class IAMWriter extends IAMStream {
         return fragments;
     }
 
-    private static int predictAmountOfFragments(int contentLength) {
+    private static int predictAmountOfFragments(int contentLength, int hashBlockMinLength) {
         int oldEstimate = 0, newEstimate = 1;
         while (oldEstimate != newEstimate) {
             oldEstimate = newEstimate;
-            int hashBlockLengthEstimate = TryteTool.TRYTES_PER_HASH * (oldEstimate-1);
+            int hashBlockLengthEstimate = hashBlockMinLength + TryteTool.TRYTES_PER_HASH * (oldEstimate-1);
             newEstimate = (int)Math.ceil((double)(contentLength + hashBlockLengthEstimate)/MAX_CHARS_PER_FRAGMENT);
         }
         return newEstimate;
