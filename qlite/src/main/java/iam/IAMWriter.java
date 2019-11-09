@@ -128,13 +128,13 @@ public class IAMWriter extends IAMStream {
         return TangleAPI.getInstance().sendMessage(address, fragments[0]);
     }
 
-    private static String[] fragmentIAMPacket(String iamPacketString, int hashBlockMinLength) {
-        int amountOfFragments = predictAmountOfFragments(iamPacketString.length(), hashBlockMinLength);
+    private static String[] fragmentIAMPacket(String iamPacketString, int minCharsOfHashBlock) {
+        int amountOfFragments = predictAmountOfFragments(iamPacketString.length(), minCharsOfHashBlock);
 
         if(amountOfFragments > MAX_FRAGMENTS_PER_IAM_PACKET)
             throw new IAMPacketSizeLimitExceeded();
 
-        int hashBlockLength = hashBlockMinLength + TryteTool.TRYTES_PER_HASH * (amountOfFragments-1);
+        int hashBlockLength = minCharsOfHashBlock + Math.max(0, TryteTool.TRYTES_PER_HASH * (amountOfFragments-1));
         String[] fragments = new String[amountOfFragments];
 
         fragments[0] = iamPacketString.substring(0, Math.min(iamPacketString.length(), MAX_CHARS_PER_FRAGMENT-hashBlockLength));
@@ -147,11 +147,11 @@ public class IAMWriter extends IAMStream {
         return fragments;
     }
 
-    private static int predictAmountOfFragments(int contentLength, int hashBlockMinLength) {
+    private static int predictAmountOfFragments(int contentLength, int minCharsOfHashBlock) {
         int oldEstimate = 0, newEstimate = 1;
         while (oldEstimate != newEstimate) {
             oldEstimate = newEstimate;
-            int hashBlockLengthEstimate = hashBlockMinLength + TryteTool.TRYTES_PER_HASH * (oldEstimate-1);
+            int hashBlockLengthEstimate = minCharsOfHashBlock + TryteTool.TRYTES_PER_HASH * (oldEstimate-1);
             newEstimate = (int)Math.ceil((double)(contentLength + hashBlockLengthEstimate)/MAX_CHARS_PER_FRAGMENT);
         }
         return newEstimate;
