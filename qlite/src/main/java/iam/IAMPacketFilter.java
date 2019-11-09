@@ -3,6 +3,7 @@ package iam;
 import constants.TangleJSONConstants;
 import exceptions.IncompleteIAMChainException;
 import iam.exceptions.IllegalIAMPacketSizeException;
+import org.apache.commons.lang3.StringUtils;
 import org.iota.jota.model.Transaction;
 import org.iota.jota.utils.TrytesConverter;
 import org.json.JSONException;
@@ -49,21 +50,21 @@ class IAMPacketFilter {
     private LinkedList<IAMPacket> findAllValidIAMPacketsFromSelection() {
         LinkedList<IAMPacket> validIAMPackets = new LinkedList<>();
         for(Transaction transaction : selection)
-            validIAMPackets = appendTransactionIfValidIAMPacket(validIAMPackets, transaction);
+            appendTransactionIfValidIAMPacket(validIAMPackets, transaction);
         return validIAMPackets;
     }
 
-    private LinkedList<IAMPacket> appendTransactionIfValidIAMPacket(LinkedList<IAMPacket> validIAMPackets, Transaction transaction) {
+    private void appendTransactionIfValidIAMPacket(LinkedList<IAMPacket> validIAMPackets, Transaction transaction) {
         IAMPacket iamPacket = fetchIAMPacket(transaction);
-        if(iamReader.isValidIAMPacket(index, iamPacket))
+        if(iamReader.isValidIAMPacket(index, iamPacket)) {
             validIAMPackets.add(iamPacket);
-        return validIAMPackets;
+        }
     }
 
     private IAMPacket fetchIAMPacket(Transaction rootTransaction) {
         try {
             String iamPacketJSONString = collectFragments(rootTransaction);
-            return new IAMPacket(new JSONObject(iamPacketJSONString));
+            return iamPacketJSONString != null ? new IAMPacket(new JSONObject(iamPacketJSONString)) : null;
         } catch (IncompleteIAMChainException | JSONException e) {
             return null;
         }
@@ -72,16 +73,39 @@ class IAMPacketFilter {
     private String collectFragments(Transaction rootTransaction) {
 
         String baseTxMsg = TrytesConverter.trytesToAscii(rootTransaction.getSignatureFragments().substring(0, TryteTool.TRYTES_PER_TRANSACTION_MESSAGE -1));
-        String[] split = baseTxMsg.split("\\{", 2);
-
+        String[] split = SplitOffHashBlockIfFirstFragmentOfPacket(baseTxMsg);
         String hashBlock = split[0];
-        String[] hashes = convertHashBlockToHashes(hashBlock);
+        String firstFragment = split[1];
 
-        String firstFragment = "{"+split[1];
+        if (hashBlock == null) {
+            return null;
+        }
 
+        String[] hashes = convertHashBlockToHashes(split[0]);
         if(hashes.length+1 > IAMStream.MAX_FRAGMENTS_PER_IAM_PACKET)
             throw new IllegalIAMPacketSizeException(rootTransaction.getHash());
         return firstFragment + fetchFragmentsFromHashes(hashes);
+    }
+
+    private static String[] SplitOffHashBlockIfFirstFragmentOfPacket(String baseTxMsg) {
+        String[] split = new String[2];
+        JSONObject hashBlockJson = null;
+        int indexOfFirstClosingBracket = baseTxMsg.indexOf("}");
+        if (baseTxMsg.startsWith("{") && indexOfFirstClosingBracket != -1) {
+            String hashBlockSubstring = baseTxMsg.substring(0, indexOfFirstClosingBracket + 1);
+            hashBlockJson = new JSONObject(hashBlockSubstring);
+            if (hashBlockJson.has(TangleJSONConstants.IAM_PACKET_HASHBLOCK)) {
+                split[0] = hashBlockJson.getString(TangleJSONConstants.IAM_PACKET_HASHBLOCK);
+            }
+        }
+
+        if (split[0] != null) {
+            split[1] = baseTxMsg.substring(hashBlockJson.toString().length());
+        } else {
+            split[1] = baseTxMsg;
+        }
+
+        return split;
     }
 
     private String fetchFragmentsFromHashes(String[] hashes) {

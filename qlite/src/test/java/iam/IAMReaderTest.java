@@ -15,10 +15,10 @@ public class IAMReaderTest {
 
     @Test
     public void testPublishAndRead() {
-//        testPublishAndReadObject(0, null);
-//        testPublishAndReadObject(1, "");
-//        testPublishAndReadObject(2, 4);
-//        testPublishAndReadObject(3, new JSONArray("[{'age': 20}, 'some string']"));
+        testPublishAndReadObject(0, null);
+        testPublishAndReadObject(1, "");
+        testPublishAndReadObject(2, 4);
+        testPublishAndReadObject(3, new JSONArray("[{'age': 20}, 'some string']"));
         testPublishAndReadObject(4, StringUtils.repeat("ok!\"9\'$3", 200));
     }
 
@@ -30,18 +30,19 @@ public class IAMReaderTest {
         assertEquals("hash of failed iam package: " + hash, String.valueOf(sent), String.valueOf(read));
     }
 
-//    @Test
-//    public void testMultipleIAMPacketConflicts() {
-//        JSONObject message1 = new JSONObject().put("planet", "mars");
-//        JSONObject message2 = new JSONObject().put("planet", "venus");
-//
-//        iamWriter.write(new IAMIndex(100), message1);
-//        assertNotNull(iamReader.read(new IAMIndex(100)));
-//
-//        iamWriter.write(new IAMIndex(100), message1);
-//        assertNotNull(iamReader.read(new IAMIndex(100)));
-//
-//        iamWriter.write(new IAMIndex(100), message2);
-//        assertNull(iamReader.read(new IAMIndex(100)));
-//    }
+    // Can't have multiple packets per index that have different values.
+    @Test
+    public void testMultipleIAMPacketConflicts() {
+        JSONObject message1 = new JSONObject().put("planet", "mars");
+        JSONObject message2 = new JSONObject().put("planet", "venus");
+
+        iamWriter.write(new IAMIndex(100), message1);
+        assertNotNull(iamReader.read(new IAMIndex(100)));
+
+        iamWriter.write(new IAMIndex(100), message1);
+        assertNotNull(iamReader.read(new IAMIndex(100)));
+
+        iamWriter.write(new IAMIndex(100), message2);
+        assertNull(iamReader.read(new IAMIndex(100)));
+    }
 }
