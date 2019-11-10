@@ -1,8 +1,0 @@
-oracle\OracleReaderTest.class
-iam\IAMReaderTest.class
-iam\signing\SignerTest.class
-iam\IAMWriterTest.class
-tangle\TryteToolTest.class
-qubic\QubicWriterTest.class
-integration\IntegrationTest.class
-qubic\QubicReaderTest.class
