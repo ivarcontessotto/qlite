@@ -32,7 +32,6 @@ public class QubicReader {
 
     private IAMReader reader;
     private List<String> assemblyList;
-    private final String id;
     private final QubicSpecification specification;
 
     /**
@@ -41,7 +40,6 @@ public class QubicReader {
      * @param id IAMStream identity of qubic
      */
     public QubicReader(String id) throws InvalidQubicTransactionException, CorruptIAMStreamException {
-        this.id = id;
         reader = new IAMReader(id);
         JSONObject qubicTransaction = fetchQubicTransaction();
         specification = new QubicSpecification(qubicTransaction);
@@ -109,7 +107,11 @@ public class QubicReader {
     }
 
     public String getID() {
-        return id;
+        return reader.getID();
+    }
+
+    public String getApplicationAddress() {
+        return getID() + TryteTool.DUMMY_CHECKSUM;
     }
 
     public QubicSpecification getSpecification() {

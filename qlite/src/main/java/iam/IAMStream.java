@@ -2,6 +2,7 @@ package iam;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
+import tangle.TryteTool;
 
 public abstract class IAMStream {
 
@@ -13,7 +14,7 @@ public abstract class IAMStream {
      * @return the address built
      * */
     public String buildAddress(IAMIndex index) {
-        return cutStreamID() + index + StringUtils.repeat('9', 9);
+        return cutStreamID() + index + TryteTool.DUMMY_CHECKSUM;
     }
 
     private String cutStreamID() {

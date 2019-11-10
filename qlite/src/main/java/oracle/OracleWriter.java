@@ -136,7 +136,7 @@ public class OracleWriter {
 
     private void sendApplication() {
         JSONObject application = generateApplication();
-        String applicationAddress = qubicReader.getID();
+        String applicationAddress = qubicReader.getApplicationAddress();
         TangleAPI.getInstance().sendMessage(applicationAddress, application.toString());
     }
 

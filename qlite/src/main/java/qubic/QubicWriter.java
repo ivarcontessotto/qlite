@@ -4,6 +4,7 @@ import constants.TangleJSONConstants;
 import exceptions.NoQubicTransactionException;
 import iam.IAMIndex;
 import iam.IAMWriter;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import tangle.TangleAPI;
@@ -99,12 +100,17 @@ public class QubicWriter {
         return writer.getID();
     }
 
+    public String getApplicationAddress() {
+        return getID() + TryteTool.DUMMY_CHECKSUM;
+    }
+
     /**
      * Fetches all applications for this qubic
      * @return the fetched applications
      * */
     public List<JSONObject> fetchApplications() {
-        Collection<String> transactionMessagesOnApplicationAddress = TangleAPI.getInstance().readTransactionsByAddress(null, getID(), true).values();
+        Collection<String> transactionMessagesOnApplicationAddress = TangleAPI.getInstance().readTransactionsByAddress(
+                null, getApplicationAddress(), true).values();
         return filterValidApplicationsFromTransactionMessages(transactionMessagesOnApplicationAddress);
     }
 

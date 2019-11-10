@@ -6,7 +6,6 @@ import org.iota.jota.IotaAPI;
 import org.iota.jota.dto.response.GetBalancesResponse;
 import org.iota.jota.dto.response.SendTransferResponse;
 import org.iota.jota.error.ArgumentException;
-import org.iota.jota.model.Input;
 import org.iota.jota.model.Transaction;
 import org.iota.jota.model.Transfer;
 import org.iota.jota.utils.TrytesConverter;

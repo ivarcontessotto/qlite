@@ -24,6 +24,8 @@ public class  TryteTool {
     public static final String TEST_ADDRESS_5 =
             "9JQJLEFYMO9ZJVQURAWLHZAMTMZBRHOGUTRBTVEJXESJKQOMWXZSENXDIYDOZPVTXCC9NCHQRXOXVQTYZRJYBMR9GD";
 
+    public static final String DUMMY_CHECKSUM = StringUtils.repeat("9", 9);
+
     public static final int TRYTES_PER_ADDRESS = 81;
     public static final int TRYTES_PER_HASH = 81;
     public static final int TRYTES_PER_BYTE = 2;
