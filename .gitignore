@@ -1,4 +1,4 @@
 *.jar
 *.iml
-/qlite/target
+target
 .idea/
