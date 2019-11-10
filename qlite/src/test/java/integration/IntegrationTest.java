@@ -1,13 +1,11 @@
-package fullworkflow;
+package integration;
 
 import oracle.OracleManager;
-import oracle.OracleReader;
 import oracle.OracleWriter;
 import org.json.JSONObject;
 import org.junit.Test;
 import qubic.EditableQubicSpecification;
 import qubic.QubicReader;
-import qubic.QubicSpecification;
 import qubic.QubicWriter;
 
 import java.util.List;
@@ -15,10 +13,10 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class SubscribeToQubicTest {
+public class IntegrationTest {
 
     @Test
-    public void testReadQubicTransaction() throws InterruptedException {
+    public void doFullWorkflow() throws InterruptedException {
 
         QubicWriter qubicWriter = new QubicWriter();
         EditableQubicSpecification eqs = qubicWriter.getEditable();

@@ -11,6 +11,10 @@
     <name>QLite : Library</name>
     <artifactId>qlite</artifactId>
 
+    <properties>
+        <skip.assembly>false</skip.assembly>
+    </properties>
+
     <repositories>
         <repository>
             <id>jitpack.io</id>

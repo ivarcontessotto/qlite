@@ -6,6 +6,8 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 
+import javax.swing.*;
+
 import static org.junit.Assert.*;
 
 public class IAMReaderTest {
@@ -32,17 +34,20 @@ public class IAMReaderTest {
 
     // Can't have multiple packets per index that have different values.
     @Test
-    public void testMultipleIAMPacketConflicts() {
+    public void testMultipleIAMPacketConflicts() throws InterruptedException {
         JSONObject message1 = new JSONObject().put("planet", "mars");
         JSONObject message2 = new JSONObject().put("planet", "venus");
 
         iamWriter.write(new IAMIndex(100), message1);
+        Thread.sleep(1000);
         assertNotNull(iamReader.read(new IAMIndex(100)));
 
         iamWriter.write(new IAMIndex(100), message1);
+        Thread.sleep(1000);
         assertNotNull(iamReader.read(new IAMIndex(100)));
 
         iamWriter.write(new IAMIndex(100), message2);
+        Thread.sleep(1000);
         assertNull(iamReader.read(new IAMIndex(100)));
     }
 }
