@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
     <name>QLite</name>
     <description>The Qubic Lite library provides a framework to interact with the Qubic Lite protocol by creating, reading and processing qubics.</description>
-    <url>https://github.com/qubiclite/qlite.lib.java</url>
+    <url>https://github.com/ivarcontessotto/qlite.lib.java</url>
 
     <licenses>
         <license>
