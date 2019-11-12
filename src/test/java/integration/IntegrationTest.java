@@ -79,9 +79,12 @@ public class IntegrationTest {
             LOGGER.debug(oracleId);
         }
 
-        while (true) {
-            LOGGER.debug("Last Completed Epoch: " + qubicReader.lastCompletedEpoch());
-            Thread.sleep(10000);
+        for (int epoch = 0; epoch < 10; epoch ++) {
+            LOGGER.debug("Waiting for Epoch " + epoch + " to Complete");
+            while (qubicReader.lastCompletedEpoch() < epoch) {
+                Thread.sleep(1000);
+            }
+            LOGGER.debug("Epoch " + epoch + " completed");
         }
 
 //        qubicReader.
