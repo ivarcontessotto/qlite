@@ -49,7 +49,9 @@ public class IAMReader extends IAMStream {
         IAMPacketFilter iamPacketFilter = new IAMPacketFilter(this, index);
         iamPacketFilter.setSelection(selection);
         List<IAMPacket> allValidIAMPackets = iamPacketFilter.findAllValidIAMPackets();
-        return findConsensusMessageAmongIAMPackets(allValidIAMPackets);
+        JSONObject object = findConsensusMessageAmongIAMPackets(allValidIAMPackets);
+        System.out.println("found object: " + object.toString());
+        return object;
     }
 
     public String getID() {

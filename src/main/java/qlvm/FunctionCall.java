@@ -6,6 +6,7 @@ import qlvm.exceptions.runtime.UnknownFunctionException;
 import qlvm.functions.*;
 import qlvm.functions.data.FunctionSizeOf;
 import qlvm.functions.data.FunctionType;
+import qlvm.functions.filedata.FunctionFileData;
 import qlvm.functions.iam.FunctionIAMRead;
 import qlvm.functions.iota.*;
 import qlvm.functions.qubic.FunctionQubicConsensus;
@@ -30,6 +31,7 @@ public final class FunctionCall {
         new FunctionType(),
         new FunctionSubstr(),
         new FunctionHash(),
+        new FunctionFileData(),
     };
 
     private FunctionCall() {}

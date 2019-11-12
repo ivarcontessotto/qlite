@@ -24,6 +24,37 @@ public class OracleReaderTest {
         assertEquals(assetMessage, expected, resultStatement.getContent());
     }
 
+    @Test
+    public void testResultStatementSecond() {
+        final String code = "return(epoch);";
+
+        QubicWriter qubicWriter = createQubicWriterWithPublishedQubicTransaction(code);
+        QubicReader qubicReader = new QubicReader(qubicWriter.getID());
+        OracleWriter oracleWriter = new OracleWriter(qubicReader);
+        oracleWriter.subscribeOracleListener(new OracleListener(){
+                @Override
+                public void onReceiveEpochResult(int epochIndex, QuorumBasedResult qbr) {
+                    onReceivedEpochResult(epochIndex, qbr);
+                }
+            });
+        qubicWriter.getAssembly().add(oracleWriter.getID());
+        qubicWriter.publishAssemblyTransaction();
+        OracleManager oracleManager = new OracleManager(oracleWriter);
+        oracleManager.start();
+
+        while (true){
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void onReceivedEpochResult(int epoch, QuorumBasedResult qbr){
+        System.out.println((epoch) + " has result: " + qbr.getResult());
+    }
+
     private static QubicWriter createQubicWriterWithPublishedQubicTransaction(String code) {
         QubicWriter qubicWriter = new QubicWriter();
         EditableQubicSpecification eqs =  qubicWriter.getEditable();

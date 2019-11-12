@@ -14,6 +14,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tangle.TryteTool;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +35,13 @@ public class IntegrationTest {
         specification.setResultPeriodDuration(30);
         specification.setHashPeriodDuration(30);
         specification.setRuntimeLimit(10);
-        specification.setCode("return(epoch^2);");
+        specification.setCode("return(epoch^2 + filedata('tempint.txt'));");
+
+        try (PrintWriter out = new PrintWriter("tempint.txt")) {
+            out.println(20);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
         LOGGER.debug("Publish Qubic Transaction to Tangle Address: " + TryteTool.TEST_ADDRESS_1);
         qubicWriter.publishQubicTransaction();
@@ -42,7 +50,7 @@ public class IntegrationTest {
         LOGGER.debug("Qubic ID (IAM Identify): " + qubicId);
 
         List<OracleWriter> oracleWriters = new ArrayList<>();
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= 4; i++) {
             LOGGER.debug("Create Oracle " + i);
             LOGGER.debug("1. Create Qubic Reader");
             QubicReader qubicReader = new QubicReader(qubicId);
@@ -53,6 +61,7 @@ public class IntegrationTest {
             OracleManager om = new OracleManager(oracleWriter, "OracleManager" + i);
             LOGGER.debug("Start Oracle Lifecycle");
             om.start();
+            LOGGER.debug("Oracle node: " + oracleWriter.getID());
         }
 
         LOGGER.debug("Wait for Oracles to Subscribe");

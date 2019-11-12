@@ -1,5 +1,6 @@
 package iam;
 
+import ch.qos.logback.classic.Logger;
 import constants.TangleJSONConstants;
 import exceptions.IncompleteIAMChainException;
 import iam.exceptions.IllegalIAMPacketSizeException;
@@ -38,8 +39,21 @@ class IAMPacketFilter {
 
     private void fetchSelectionIfItIsNull() {
         String addressOfIndex = iamReader.buildAddress(index);
-        if(selection == null)
+        if (selection == null){
             selection = TangleAPI.getInstance().findTransactionsByAddresses(new String[]{addressOfIndex});
+            List<Transaction> foundTransactions = selection;
+            if (addressOfIndex.contains("RESULTS")){
+                LinkedList<IAMPacket> validIAMPackets = new LinkedList<>();
+                for (Transaction transaction : foundTransactions){
+                    IAMPacket iamPacket = fetchIAMPacket(transaction);
+                    if (iamReader.isValidIAMPacket(index, iamPacket)) {
+                        validIAMPackets.add(iamPacket);
+                    }
+                }
+
+                System.out.println(validIAMPackets.size() + " valid transactions found at address: " + addressOfIndex);
+            }
+        }
     }
 
     private void preventObjectReuse() {

@@ -86,6 +86,7 @@ public class ConsensusBuilder {
         Map<String, Double> quorumVoting = new HashMap<>();
         for(IAMReader voter : voters) {
             JSONObject vote = voter.read(index);
+            System.out.println("voters: " + voters.size() + ",  object: " + vote + ", toString: " + vote.toString() + ", quorumVoting: " + quorumVoting.keySet().toString());
             if(vote != null)
                 addVote(quorumVoting, vote.get("result").toString());
         }
