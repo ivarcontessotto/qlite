@@ -87,7 +87,7 @@ public class ConsensusBuilder {
         for(IAMReader voter : voters) {
             JSONObject vote = voter.read(index);
             if(vote != null)
-                addVote(quorumVoting, vote.toString());
+                addVote(quorumVoting, vote.get("result").toString());
         }
         return quorumVoting;
     }
