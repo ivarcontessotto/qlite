@@ -1,9 +1,12 @@
 package integration;
 
 import constants.TangleJSONConstants;
+import iam.IAMIndex;
 import oracle.*;
+import oracle.statements.result.ResultStatementIAMIndex;
 import org.json.JSONObject;
 import org.junit.Test;
+import qlvm.InterQubicResultFetcher;
 import qubic.EditableQubicSpecification;
 import qubic.QubicReader;
 import qubic.QubicWriter;
@@ -26,10 +29,10 @@ public class IntegrationTest {
         LOGGER.debug("Create Qubic");
         QubicWriter qubicWriter = new QubicWriter();
         EditableQubicSpecification specification = qubicWriter.getEditable();
-        specification.setExecutionStartToSecondsInFuture(30);
-        specification.setResultPeriodDuration(10);
-        specification.setHashPeriodDuration(10);
-        specification.setRuntimeLimit(5);
+        specification.setExecutionStartToSecondsInFuture(60);
+        specification.setResultPeriodDuration(30);
+        specification.setHashPeriodDuration(30);
+        specification.setRuntimeLimit(10);
         specification.setCode("return(epoch^2);");
 
         LOGGER.debug("Publish Qubic Transaction to Tangle Address: " + TryteTool.TEST_ADDRESS_1);
@@ -39,7 +42,7 @@ public class IntegrationTest {
         LOGGER.debug("Qubic ID (IAM Identify): " + qubicId);
 
         List<OracleWriter> oracleWriters = new ArrayList<>();
-        for (int i = 1; i <= 1; i++) {
+        for (int i = 1; i <= 3; i++) {
             LOGGER.debug("Create Oracle " + i);
             LOGGER.debug("1. Create Qubic Reader");
             QubicReader qubicReader = new QubicReader(qubicId);
@@ -53,7 +56,7 @@ public class IntegrationTest {
         }
 
         LOGGER.debug("Wait for Oracles to Subscribe");
-        Thread.sleep(15000);
+        Thread.sleep(45000);
 
         LOGGER.debug("Fetch Application");
         List<JSONObject> applications = qubicWriter.fetchApplications();
@@ -79,59 +82,25 @@ public class IntegrationTest {
             LOGGER.debug(oracleId);
         }
 
-        for (int epoch = 0; epoch < 10; epoch ++) {
+        for (int epoch = 0; epoch < 10; epoch++) {
             LOGGER.debug("Waiting for Epoch " + epoch + " to Complete");
             while (qubicReader.lastCompletedEpoch() < epoch) {
                 Thread.sleep(1000);
             }
+
             LOGGER.debug("Epoch " + epoch + " completed");
+            LOGGER.debug("Fetch quorum based result for Epoch");
+            IAMIndex iamIndex = new ResultStatementIAMIndex(epoch);
+            QuorumBasedResult qbr = InterQubicResultFetcher.fetchQubicConsensus(qubicId, iamIndex);
+
+            double quorum = qbr.getQuorum();
+            double quorumMax = qbr.getQuorumMax();
+            double percentage = Math.round(1000 * quorum / quorumMax) / 10;
+
+            LOGGER.debug("INDEX:  " + (iamIndex.getKeyword().length() > 0 ? iamIndex.getKeyword() + " : " : "") + iamIndex.getPosition());
+            LOGGER.debug("RESULT: " + qbr.getResult());
+            LOGGER.debug("QUORUM: " + quorum + " / " + quorumMax + " ("+percentage+"%)");
         }
-
-//        qubicReader.
-//
-//        while (qubicReader.getAssemblyList()){
-//            try {
-//                Thread.sleep(1000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//
-//        int lastEpoch = qubicReader.lastCompletedEpoch();
-//
-//        for (OracleWriter oracleWriter1 : oracleWriters){
-//            oracleWriter1.doHashStatement(lastEpoch);
-//            oracleWriter1.doResultStatement();
-//        }
-//
-//        Assembly assemblyy = new Assembly(qubicReader);
-//        ConsensusBuilder consensusBuilderr = new ConsensusBuilder(assemblyy);
-//        QuorumBasedResult quorumBasedResultt = consensusBuilderr.buildConsensus(assemblyOracleReaders, 1);
-
-//        int currentEpoch = -1;
-//        while (true){
-//            int lastEpoch = qubicReader.lastCompletedEpoch();
-//            if (currentEpoch != lastEpoch){
-//                currentEpoch = lastEpoch;
-//                for (OracleWriter oracleWriter1 : oracleWriters){
-//                    oracleWriter1.doHashStatement(currentEpoch);
-//                    oracleWriter1.doResultStatement();
-//                }
-//
-//                Assembly assembly = new Assembly(qubicReader);
-//                ConsensusBuilder consensusBuilder = new ConsensusBuilder(assembly);
-//                QuorumBasedResult quorumBasedResult = consensusBuilder.buildConsensus(assemblyOracleReaders, currentEpoch);
-//                System.out.println((currentEpoch) + " has result: " + quorumBasedResult.getResult());
-//                if (lastEpoch == 100){
-//                    break;
-//                }
-//            }
-//        }
-
-//        ResultStatement epocheOne = oracleReader.getResultStatementReader().read(1);
-//        ResultStatement epocheTwo = oracleReader.getResultStatementReader().read(2);
-//        ResultStatement epocheThree = oracleReader.getResultStatementReader().read(3);
-//        ResultStatement epocheFour = oracleReader.getResultStatementReader().read(4);
     }
 }
 

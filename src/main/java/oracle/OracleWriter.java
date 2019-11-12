@@ -120,6 +120,7 @@ public class OracleWriter {
      * */
     public void doResultStatement() {
         fetchStatements(new HashStatementIAMIndex(currentlyProcessedResult.getEpochIndex()));
+        logger.debug("Write Result Statement");
         resultStatementWriter.write(currentlyProcessedResult);
         publishEpochLinkIfSet();
     }
