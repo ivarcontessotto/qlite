@@ -2,6 +2,8 @@ package oracle;
 
 import qubic.QubicReader;
 import qubic.QubicSpecification;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author microhash
@@ -13,21 +15,28 @@ import qubic.QubicSpecification;
  * */
 public class OracleManager {
 
+    private final Logger logger;
     private final OracleWriter ow;
     private State state = State.PAUSED;
 
     public OracleManager(OracleWriter ow) {
+        this(ow, "");
+    }
+
+    public OracleManager(OracleWriter ow, String name) {
+        this.logger = name.equals("") ? LogManager.getLogger(OracleManager.class) : LogManager.getLogger(name);
         this.ow = ow;
         this.ow.setManager(this);
     }
 
     public void start() {
-        new Thread() {
-            @Override
-            public void run() {
+        new Thread(() -> {
+            try {
                 startSynchronous();
+            } catch (Throwable throwable) {
+                logger.error("Error during Oracle Lifecycle", throwable);
             }
-        }.start();
+        }).start();
     }
 
 
@@ -35,17 +44,25 @@ public class OracleManager {
      * Runs the oracle life cycle synchronously as opposed to start().
      * */
     public void startSynchronous() {
+        logger.debug("Start Oracle Lifecycle");
 
+        logger.debug("Lifecycle State: Pre-Execution");
         state = State.PRE_EXECUTION;
 
         if(ow.getQubicReader().getSpecification().timeUntilExecutionStart() > 0) {
+            logger.debug("Apply Oracle to Qubic");
             ow.apply();
+            logger.debug("Wait For Execution Start");
             takeABreak(ow.getQubicReader().getSpecification().timeUntilExecutionStart());
         }
 
+        logger.debug("Check if Oracle is Part of Assembly");
         if(ow.assemble()) {
+            logger.debug("Success! Made it into Assembly");
             runEpochs();
         } else {
+            logger.debug("Sadface! Not Part of Assembly");
+            logger.debug("Lifecycle State: Aborted");
             state = State.ABORTED;
         }
     }
@@ -60,10 +77,12 @@ public class OracleManager {
         if(!ow.isAcceptedIntoAssembly())
             return;
 
+        logger.debug("Lifecycle State: Running");
         state = State.RUNNING;
         while(state != State.PAUSING)
             runEpochAndCatchThrowable();
 
+        logger.debug("Lifecycle State: Paused");
         state = State.PAUSED;
     }
 
@@ -71,6 +90,7 @@ public class OracleManager {
         try {
             tryToRunEpoch();
         } catch (Throwable t) {
+            logger.error("Error while running Epoche");
             t.printStackTrace();
         }
     }
@@ -79,15 +99,22 @@ public class OracleManager {
         final QubicReader qubic = ow.getQubicReader();
         final QubicSpecification spec =  qubic.getSpecification();
 
-        final int e = determineEpochToRun();
-        final long epochStart = spec.getExecutionStartUnix() + e * spec.getEpochDuration();
+        logger.debug("Determine Epoch to Run");
+        final int epoch = determineEpochToRun();
+        logger.debug("Run Epoch: " + epoch);
+
+        final long epochStart = spec.getExecutionStartUnix() + epoch * spec.getEpochDuration();
 
         // run hash epoch
+        logger.debug("Wait for Hash Epoch Start");
         takeABreak(epochStart - getUnixTimeStamp());
-        ow.doHashStatement(e);
+        logger.debug("Run Hash Epoch");
+        ow.doHashStatement(epoch);
 
         // run result epoch
+        logger.debug("Wait for Result Epoch Start");
         takeABreak(epochStart - getUnixTimeStamp() + spec.getHashPeriodDuration());
+        logger.debug("Run Result Epoch");
         ow.doResultStatement();
     }
 

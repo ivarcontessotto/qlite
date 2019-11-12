@@ -16,7 +16,8 @@ import org.json.JSONObject;
 import qubic.QubicReader;
 import tangle.TangleAPI;
 import tangle.TryteTool;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,11 +35,23 @@ public class OracleWriter {
     private String name = "ql-node";
     private final LinkedList<OracleListener> oracleListeners = new LinkedList<>();
 
+    private final Logger logger;
+
     /**
      * Creates a new IAMStream identity for this oracle.
      * @param qubicReader qubic to be processed
      * */
     public OracleWriter(QubicReader qubicReader) {
+        this(qubicReader, "")
+;    }
+
+    /**
+     * Creates a new IAMStream identity for this oracle.
+     * @param qubicReader qubic to be processed
+     * @param name name of the oracle writer. For better logging.
+     * */
+    public OracleWriter(QubicReader qubicReader, String name) {
+        this.logger = name.equals("") ? LogManager.getLogger(OracleWriter.class) : LogManager.getLogger(name);
         this.qubicReader = qubicReader;
         assembly = new Assembly(qubicReader);
         writer = new IAMWriter();
@@ -52,6 +65,7 @@ public class OracleWriter {
      * @param writer            IAM writer of the oracle
      * */
     public OracleWriter(QubicReader qubicReader, IAMWriter writer) {
+        this.logger = LogManager.getLogger(OracleWriter.class);
         this.qubicReader = qubicReader;
         assembly = new Assembly(qubicReader);
         this.writer = writer;
@@ -62,17 +76,29 @@ public class OracleWriter {
     /**
      * Lets assembly fetch ResultStatements from last epoch, then creates and publishes the HashStatement
      * for the current epoch. Calculates the result for the subsequent ResultStatement.
+     *
      * @param epochIndex index of the current epoch
+     *
+     * Results from last epoch may be needed in calculation of current epoch result.
+     * Publishing hash statement of result prevents oracles from just copying the results from other oracles.
+     * They have to publish the hash of their result before the actual quorum based result can be revealed
      * */
     public void doHashStatement(int epochIndex) {
 
-        if(epochIndex > 0)
+        // Results from last epoch may be needed for calculating new result.
+        if(epochIndex > 0) {
+            logger.debug("Fetch Last Epoch Result Statements");
             fetchStatements(new ResultStatementIAMIndex(epochIndex-1));
+        }
 
+        logger.debug("Calculate current Epoch Result and Hash");
         this.currentlyProcessedResult = new ResultStatement(epochIndex, calcResult(epochIndex));
-
         String hash = ResultHasher.hash(this.currentlyProcessedResult);
+        logger.debug("Result: " + this.currentlyProcessedResult.getContent());
+        logger.debug("Result Hash: " + hash);
+
         int[] ratings = assembly.getRatings();
+        logger.debug("Write Hash Statement");
         hashStatementWriter.write(new HashStatement(epochIndex, hash, ratings));
     }
 
@@ -170,13 +196,13 @@ public class OracleWriter {
 
     public boolean isAcceptedIntoAssembly() {
         final QubicReader qubic = getQubicReader();
-        final List<String> assemblyList = qubic.getAssemblyList();
-        if(assemblyList == null) {
+        final List<String> acceptedOracles = qubic.getAssemblyList();
+        if(acceptedOracles == null) {
             if(qubic.getSpecification().ageOfExecutionPhase() < 0)
                 throw new IllegalStateException("assembly transaction has not been published yet");
             return false;
         }
-        return assemblyList.contains(getID());
+        return acceptedOracles.contains(getID());
     }
 
     /**

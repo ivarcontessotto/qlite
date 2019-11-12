@@ -9,6 +9,8 @@ import org.iota.jota.error.ArgumentException;
 import org.iota.jota.model.Transaction;
 import org.iota.jota.model.Transfer;
 import org.iota.jota.utils.TrytesConverter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.net.MalformedURLException;
 import java.security.InvalidParameterException;
@@ -29,6 +31,7 @@ public class TangleAPI {
 
     private static final String TAG = "QLITE9999999999999999999999";
 
+    private final Logger logger = LogManager.getLogger(TangleAPI.class);
     private final IotaAPI wrappedAPI;
     private int mwm;
 
@@ -103,6 +106,7 @@ public class TangleAPI {
     }
 
     public String sendMessage(String address, String message) {
+        logger.debug("Send Message to Tangle\nAddress: " + address + "\nMessage: " + message);
         return sendTrytes(address, TrytesConverter.asciiToTrytes(message));
     }
 
