@@ -27,7 +27,7 @@ public class InterQubicResultFetcher {
      * @param epochIndex  index of the epoch of which the result shall be determined
      * @return the fetched QuorumBasedResult
      * */
-    public static QuorumBasedResult fetchResult(String qubicId, int epochIndex) {
+    public static QuorumBasedResult fetchResultConsensus(String qubicId, int epochIndex) {
         Assembly assembly = getAssembly(qubicId);
         return findConsensus(assembly, epochIndex);
     }
@@ -38,12 +38,19 @@ public class InterQubicResultFetcher {
      * @param epochIndex  index of the epoch of which the result shall be determined
      * @return the fetched QuorumBasedResult
      * */
-    public static QuorumBasedResult fetchResult(QubicReader qubicReader, int epochIndex) {
+    public static QuorumBasedResult fetchResultConsensus(QubicReader qubicReader, int epochIndex) {
         Assembly assembly = getAssembly(qubicReader);
         return findConsensus(assembly, epochIndex);
     }
 
-    public static QuorumBasedResult fetchQubicConsensus(String qubicId, IAMIndex index) {
+    /**
+     * Fetches the QuorumBasedResult from any IAM Index of the qubics assembly.
+     * Operates on the IAM message level. Does not work to get the qubics result consensus!
+     * @param qubicId
+     * @param index
+     * @return
+     */
+    public static QuorumBasedResult fetchIAMConsensus(String qubicId, IAMIndex index) {
         Assembly assembly = getAssembly(qubicId);
         return assembly.getConsensusBuilder().buildIAMConsensus(index);
     }

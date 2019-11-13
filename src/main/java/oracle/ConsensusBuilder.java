@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ConsensusBuilder {
 
@@ -72,15 +73,19 @@ public class ConsensusBuilder {
     }
 
     public QuorumBasedResult buildIAMConsensus(IAMIndex index) {
-        List<IAMReader> selection = new LinkedList<>();
-        for(OracleReader or : assembly.selectRandomOracleReaders(GeneralConstants.QUORUM_MAX_ORACLE_SELECTION_SIZE))
-            selection.add(or.getReader());
+        List<IAMReader> selection = assembly.selectRandomOracleReaders(GeneralConstants.QUORUM_MAX_ORACLE_SELECTION_SIZE)
+                .stream()
+                .map(OracleReader::getReader)
+                .collect(Collectors.toList());
 
-        StringBuilder sb = new StringBuilder("Randomly selected Readers for consensus:");
-        selection.forEach(r -> sb.append("\n" + r.getID()));
-        LOGGER.debug(sb.toString());
-
+        logSelectedReaders(selection);
         return findVotingQuorum(accumulateIAMVotings(selection, index), selection.size());
+    }
+
+    private void logSelectedReaders(List<IAMReader> readers) {
+        StringBuilder sb = new StringBuilder("Randomly selected Readers for consensus:");
+        readers.forEach(r -> sb.append("\n" + r.getID()));
+        LOGGER.debug(sb.toString());
     }
 
     private static Map<String, Double> accumulateEpochVotings(List<OracleReader> voters, int epochIndex) {
@@ -94,8 +99,6 @@ public class ConsensusBuilder {
         Map<String, Double> quorumVoting = new HashMap<>();
         for(IAMReader voter : voters) {
             JSONObject vote = voter.read(index);
-            LOGGER.debug("IAMVotings: " + voters.size() + ",  object: " + vote + ", toString: " +
-                    vote.toString() + ", quorumVoting: " + quorumVoting.keySet().toString());
             addVote(quorumVoting, vote.toString());
         }
         return quorumVoting;
@@ -136,5 +139,4 @@ public class ConsensusBuilder {
 
         return new QuorumBasedResult(highScore, totalVotesAllowed, highScoreResult);
     }
-
 }

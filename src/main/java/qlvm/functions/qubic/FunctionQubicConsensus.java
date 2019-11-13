@@ -1,10 +1,8 @@
 package qlvm.functions.qubic;
 
 import iam.IAMIndex;
-import oracle.QuorumBasedResult;
 import qlvm.InterQubicResultFetcher;
 import qlvm.QLVM;
-import qlvm.exceptions.runtime.UnknownFunctionException;
 import qlvm.functions.Function;
 
 public class FunctionQubicConsensus extends Function {
@@ -23,7 +21,7 @@ public class FunctionQubicConsensus extends Function {
 
         int iamIndexPosition = parseStringToNumber(par[2]).intValue();
 
-        String result = InterQubicResultFetcher.fetchQubicConsensus(qubicID, new IAMIndex(iamIndexKeyword, iamIndexPosition)).getResult();
+        String result = InterQubicResultFetcher.fetchIAMConsensus(qubicID, new IAMIndex(iamIndexKeyword, iamIndexPosition)).getResult();
         return result == null ? null : "'"+result+"'";
     }
 }

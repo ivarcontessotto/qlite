@@ -1,10 +1,9 @@
 package integration;
 
 import constants.TangleJSONConstants;
-import iam.IAMIndex;
 import oracle.*;
-import oracle.statements.result.ResultStatementIAMIndex;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import qlvm.InterQubicResultFetcher;
 import qubic.EditableQubicSpecification;
@@ -14,8 +13,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tangle.TryteTool;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,11 +20,9 @@ public class IntegrationTest {
 
     private final static Logger LOGGER = LogManager.getLogger(IntegrationTest.class);
 
+    @Ignore
     @Test
-    public void integrationTest() throws InterruptedException {
-
-        LOGGER.debug("Start integration test");
-
+    public void testEpochResultsIT() throws InterruptedException {
         LOGGER.debug("Create Qubic");
         QubicWriter qubicWriter = new QubicWriter();
         EditableQubicSpecification specification = qubicWriter.getEditable();
@@ -37,11 +32,11 @@ public class IntegrationTest {
         specification.setRuntimeLimit(10);
         specification.setCode("return(epoch^2);");
 
-        try (PrintWriter out = new PrintWriter("tempint.txt")) {
-            out.println(20);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+//        try (PrintWriter out = new PrintWriter("tempint.txt")) {
+//            out.println(20);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
 
         LOGGER.debug("Publish Qubic Transaction to Tangle Address: " + TryteTool.TEST_ADDRESS_1);
         qubicWriter.publishQubicTransaction();
@@ -91,9 +86,7 @@ public class IntegrationTest {
             LOGGER.debug(oracleId);
         }
 
-        // TOdo fix the random oraclr writer chose method. Can take very long.
-
-        for (int epoch = 0; epoch < 10; epoch++) {
+        for (int epoch = 0; epoch < 5; epoch++) {
             LOGGER.debug("Waiting for Epoch " + epoch + " to Complete");
             while (qubicReader.lastCompletedEpoch() < epoch) {
                 Thread.sleep(1000);
@@ -101,7 +94,7 @@ public class IntegrationTest {
 
             LOGGER.debug("Epoch " + epoch + " completed");
             LOGGER.debug("Fetch quorum based result for Epoch");
-            QuorumBasedResult qbr = InterQubicResultFetcher.fetchResult(qubicId, epoch);
+            QuorumBasedResult qbr = InterQubicResultFetcher.fetchResultConsensus(qubicId, epoch);
 
             double quorum = qbr.getQuorum();
             double quorumMax = qbr.getQuorumMax();

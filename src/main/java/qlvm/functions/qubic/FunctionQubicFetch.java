@@ -4,10 +4,8 @@ import oracle.OracleWriter;
 import qlvm.InterQubicResultFetcher;
 import oracle.QuorumBasedResult;
 import qlvm.QLVM;
-import qlvm.exceptions.runtime.QLRunTimeException;
 import qlvm.exceptions.runtime.UnknownFunctionException;
 import qlvm.functions.Function;
-import qubic.QubicWriter;
 
 public class FunctionQubicFetch extends Function {
 
@@ -32,7 +30,7 @@ public class FunctionQubicFetch extends Function {
         if(qubicRoot.equals(oracleWriter.getQubicReader().getID()) && oracleWriter.getAssembly().hasMonitoredEpoch(epochIndex))
             qbr = oracleWriter.getAssembly().getConsensusBuilder().buildConsensus(epochIndex);
         else
-            qbr = InterQubicResultFetcher.fetchResult(qubicRoot, epochIndex);
+            qbr = InterQubicResultFetcher.fetchResultConsensus(qubicRoot, epochIndex);
 
         return qbr.getResult();
     }

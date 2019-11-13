@@ -1,10 +1,10 @@
 package iam;
 
-import ch.qos.logback.classic.Logger;
 import constants.TangleJSONConstants;
 import exceptions.IncompleteIAMChainException;
 import iam.exceptions.IllegalIAMPacketSizeException;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.iota.jota.model.Transaction;
 import org.iota.jota.utils.TrytesConverter;
 import org.json.JSONException;
@@ -17,6 +17,7 @@ import java.util.List;
 
 class IAMPacketFilter {
 
+    private final Logger logger;
     private boolean used = false;
     private final IAMReader iamReader;
     private final IAMIndex index;
@@ -25,6 +26,7 @@ class IAMPacketFilter {
     IAMPacketFilter(IAMReader iamReader, IAMIndex index) {
         this.iamReader = iamReader;
         this.index = index;
+        this.logger = LogManager.getLogger(IAMPacketFilter.class);
     }
 
     void setSelection(List<Transaction> selection) {
@@ -41,18 +43,6 @@ class IAMPacketFilter {
         String addressOfIndex = iamReader.buildAddress(index);
         if (selection == null){
             selection = TangleAPI.getInstance().findTransactionsByAddresses(new String[]{addressOfIndex});
-            List<Transaction> foundTransactions = selection;
-            if (addressOfIndex.contains("RESULTS")){
-                LinkedList<IAMPacket> validIAMPackets = new LinkedList<>();
-                for (Transaction transaction : foundTransactions){
-                    IAMPacket iamPacket = fetchIAMPacket(transaction);
-                    if (iamReader.isValidIAMPacket(index, iamPacket)) {
-                        validIAMPackets.add(iamPacket);
-                    }
-                }
-
-                System.out.println(validIAMPackets.size() + " valid transactions found at address: " + addressOfIndex);
-            }
         }
     }
 

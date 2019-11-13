@@ -49,13 +49,10 @@ public class IAMReader extends IAMStream {
      * @return the read JSONObject, NULL if no transaction with a valid signature found.
      * */
     public JSONObject readFromSelection(IAMIndex index, List<Transaction> selection) {
-
         IAMPacketFilter iamPacketFilter = new IAMPacketFilter(this, index);
         iamPacketFilter.setSelection(selection);
         List<IAMPacket> allValidIAMPackets = iamPacketFilter.findAllValidIAMPackets();
-        JSONObject object = findConsensusMessageAmongIAMPackets(allValidIAMPackets);
-        this.logger.debug("Read consensus from index " + index + " : " + (object != null ? object.toString() : null));
-        return object;
+        return findConsensusMessageAmongIAMPackets(allValidIAMPackets);
     }
 
     public String getID() {
