@@ -91,6 +91,8 @@ public class IntegrationTest {
             LOGGER.debug(oracleId);
         }
 
+        // TOdo fix the random oraclr writer chose method. Can take very long.
+
         for (int epoch = 0; epoch < 10; epoch++) {
             LOGGER.debug("Waiting for Epoch " + epoch + " to Complete");
             while (qubicReader.lastCompletedEpoch() < epoch) {
@@ -99,14 +101,13 @@ public class IntegrationTest {
 
             LOGGER.debug("Epoch " + epoch + " completed");
             LOGGER.debug("Fetch quorum based result for Epoch");
-            IAMIndex iamIndex = new ResultStatementIAMIndex(epoch);
-            QuorumBasedResult qbr = InterQubicResultFetcher.fetchQubicConsensus(qubicId, iamIndex);
+            QuorumBasedResult qbr = InterQubicResultFetcher.fetchResult(qubicId, epoch);
 
             double quorum = qbr.getQuorum();
             double quorumMax = qbr.getQuorumMax();
             double percentage = Math.round(1000 * quorum / quorumMax) / 10;
 
-            LOGGER.debug("INDEX:  " + (iamIndex.getKeyword().length() > 0 ? iamIndex.getKeyword() + " : " : "") + iamIndex.getPosition());
+            LOGGER.debug("EPOCH:  " + epoch);
             LOGGER.debug("RESULT: " + qbr.getResult());
             LOGGER.debug("QUORUM: " + quorum + " / " + quorumMax + " ("+percentage+"%)");
         }
