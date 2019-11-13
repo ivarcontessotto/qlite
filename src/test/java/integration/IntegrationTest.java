@@ -35,7 +35,7 @@ public class IntegrationTest {
         specification.setResultPeriodDuration(30);
         specification.setHashPeriodDuration(30);
         specification.setRuntimeLimit(10);
-        specification.setCode("return(epoch^2 + filedata('tempint.txt'));");
+        specification.setCode("return(epoch^2);");
 
         try (PrintWriter out = new PrintWriter("tempint.txt")) {
             out.println(20);
@@ -50,7 +50,7 @@ public class IntegrationTest {
         LOGGER.debug("Qubic ID (IAM Identify): " + qubicId);
 
         List<OracleWriter> oracleWriters = new ArrayList<>();
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= 3; i++) {
             LOGGER.debug("Create Oracle " + i);
             LOGGER.debug("1. Create Qubic Reader");
             QubicReader qubicReader = new QubicReader(qubicId);

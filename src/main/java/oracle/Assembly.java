@@ -6,6 +6,8 @@ import oracle.statements.result.ResultStatement;
 import oracle.statements.StatementIAMIndex;
 import qubic.QubicReader;
 import tangle.TangleAPI;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -17,6 +19,7 @@ import java.util.*;
  * */
 public class Assembly {
 
+    private final Logger logger;
     private final QubicReader qubicReader;
     private final List<OracleReader> oracleReaders = new LinkedList<>();
     private final ConsensusBuilder consensusBuilder = new ConsensusBuilder(this);
@@ -25,6 +28,7 @@ public class Assembly {
     private int firstEpochIndex = -1; // epoch at which the oracle started monitoring the qubic epochs. necessary to decide when to use InterQubicResultFetcher for own assembly
 
     public Assembly(QubicReader qubicReader) {
+        this.logger = LogManager.getLogger(Assembly.class);
         this.qubicReader = qubicReader;
     }
 
@@ -113,6 +117,9 @@ public class Assembly {
      * @return random selection of oracleReaders from the assembly (no double entries)
      * */
     public List<OracleReader> selectRandomOracleReaders(int amount) {
+        StringBuilder sb = new StringBuilder("Assembly Oracles to select from: ");
+        oracleReaders.forEach(r -> sb.append("\n" + r.getID()));
+        logger.debug(sb.toString());
 
         if(amount < 0)
             throw new IllegalArgumentException("parameter amount cannot be negative");
@@ -125,6 +132,7 @@ public class Assembly {
             int randomIndex = (int)(Math.random() * selected.length);
             if(selected[randomIndex])
                 continue;
+            selected[randomIndex] = true;
             selection.add(oracleReaders.get(randomIndex));
             amount--;
         }

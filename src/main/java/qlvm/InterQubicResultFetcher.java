@@ -32,10 +32,6 @@ public class InterQubicResultFetcher {
         return findConsensus(assembly, epochIndex);
     }
 
-    public static QuorumBasedResult fetchQubicConsensus(String qubicId, IAMIndex index) {
-        Assembly assembly = getAssembly(qubicId);
-        return assembly.getConsensusBuilder().buildIAMConsensus(index);
-    }
     /**
      * Fetches the QuorumBasedResult from any qubic.
      * @param qubicReader QubicReader for qubic to fetch from
@@ -45,6 +41,11 @@ public class InterQubicResultFetcher {
     public static QuorumBasedResult fetchResult(QubicReader qubicReader, int epochIndex) {
         Assembly assembly = getAssembly(qubicReader);
         return findConsensus(assembly, epochIndex);
+    }
+
+    public static QuorumBasedResult fetchQubicConsensus(String qubicId, IAMIndex index) {
+        Assembly assembly = getAssembly(qubicId);
+        return assembly.getConsensusBuilder().buildIAMConsensus(index);
     }
 
     private static QuorumBasedResult findConsensus(Assembly assembly, int epochIndex) {

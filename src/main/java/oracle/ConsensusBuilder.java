@@ -3,9 +3,10 @@ package oracle;
 import constants.GeneralConstants;
 import iam.IAMIndex;
 import iam.IAMReader;
-import iam.IAMWriter;
 import oracle.statements.result.ResultStatement;
 import org.json.JSONObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ConsensusBuilder {
+
+    private final static Logger LOGGER = LogManager.getLogger(ConsensusBuilder.class);
 
     private static final double QUORUM_MIN = 2D/3D;
     private final Assembly assembly;
@@ -72,6 +75,11 @@ public class ConsensusBuilder {
         List<IAMReader> selection = new LinkedList<>();
         for(OracleReader or : assembly.selectRandomOracleReaders(GeneralConstants.QUORUM_MAX_ORACLE_SELECTION_SIZE))
             selection.add(or.getReader());
+
+        StringBuilder sb = new StringBuilder("Randomly selected Readers for consensus:");
+        selection.forEach(r -> sb.append("\n" + r.getID()));
+        LOGGER.debug(sb.toString());
+
         return findVotingQuorum(accumulateIAMVotings(selection, index), selection.size());
     }
 
@@ -86,9 +94,9 @@ public class ConsensusBuilder {
         Map<String, Double> quorumVoting = new HashMap<>();
         for(IAMReader voter : voters) {
             JSONObject vote = voter.read(index);
-            System.out.println("voters: " + voters.size() + ",  object: " + vote + ", toString: " + vote.toString() + ", quorumVoting: " + quorumVoting.keySet().toString());
-            if(vote != null)
-                addVote(quorumVoting, vote.get("result").toString());
+            LOGGER.debug("IAMVotings: " + voters.size() + ",  object: " + vote + ", toString: " +
+                    vote.toString() + ", quorumVoting: " + quorumVoting.keySet().toString());
+            addVote(quorumVoting, vote.toString());
         }
         return quorumVoting;
     }

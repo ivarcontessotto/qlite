@@ -3,6 +3,8 @@ package iam;
 import iam.exceptions.CorruptIAMStreamException;
 import exceptions.IncompleteIAMChainException;
 import iam.signing.SignatureValidator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.iota.jota.model.Transaction;
 import org.json.JSONObject;
 import tangle.TangleAPI;
@@ -20,6 +22,7 @@ public class IAMReader extends IAMStream {
 
     private final String id;
     private final String publicKeyTrytes;
+    private final Logger logger;
 
     /**
      * Creates the IAMReader for a specific IAMWriter ID. Fetches the according public Key.
@@ -27,6 +30,7 @@ public class IAMReader extends IAMStream {
      * */
     public IAMReader(String id) throws CorruptIAMStreamException {
         this.id = id;
+        this.logger = LogManager.getLogger(IAMReader.class);
         try {
             publicKeyTrytes = TangleAPI.getInstance().readTransactionTrytes(id);
         } catch (IncompleteIAMChainException e) {
@@ -50,7 +54,7 @@ public class IAMReader extends IAMStream {
         iamPacketFilter.setSelection(selection);
         List<IAMPacket> allValidIAMPackets = iamPacketFilter.findAllValidIAMPackets();
         JSONObject object = findConsensusMessageAmongIAMPackets(allValidIAMPackets);
-        System.out.println("found object: " + object.toString());
+        this.logger.debug("Read consensus from index " + index + " : " + (object != null ? object.toString() : null));
         return object;
     }
 
