@@ -14,10 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.net.MalformedURLException;
 import java.security.InvalidParameterException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author microhash
@@ -82,6 +79,7 @@ public class TangleAPI {
 
         while (true) {
             try {
+                logger.debug("Send Trytes\nAddress: " + address + "\nMessage: " + tryteMessage);
                 SendTransferResponse response = wrappedAPI.sendTransfer("", 1, 3, mwm, transfers,
                         null, null, true, false, null);
                 return response.getTransactions().get(0).getHash();
@@ -106,7 +104,7 @@ public class TangleAPI {
     }
 
     public String sendMessage(String address, String message) {
-        logger.debug("Send Message to Tangle\nAddress: " + address + "\nMessage: " + message);
+        logger.debug("Send Message\nAddress: " + address + "\nMessage: " + message);
         return sendTrytes(address, TrytesConverter.asciiToTrytes(message));
     }
 
@@ -116,22 +114,19 @@ public class TangleAPI {
      * @return hashes of found transactions
      * */
     public List<Transaction> findTransactionsByAddresses(String[] addresses) {
+        try {
 
-        List<Transaction> transactions = null;
-
-        while (transactions == null) {
-            try {
-                return wrappedAPI.findTransactionObjectsByAddresses(addresses);
-            } catch (ArgumentException e) {
-                e.printStackTrace();
-                return null;
-            } catch (NullPointerException e) {
-                StackTraceElement ste = e.getStackTrace()[0];
-                System.err.println("NullPointerException in file " + ste.getFileName() + " at line #" + ste.getLineNumber());
-            }
+            this.logger.debug("Find transactions by addresses:" + getAddressLogLines(addresses));
+            List<Transaction> foundTransactions = wrappedAPI.findTransactionObjectsByAddresses(addresses);
+            this.logger.debug("Found transactions:" + getHashLogLines(foundTransactions));
+            return foundTransactions;
+        } catch (ArgumentException e) {
+            logger.error("Error reading transactions by addresses", e);
+            return null;
+        } catch (NullPointerException e) {
+            logger.error("Error reading transactions by addresses", e);
         }
-
-        return transactions;
+        return null;
     }
 
     /**
@@ -144,10 +139,14 @@ public class TangleAPI {
     public Map<String, String> readTransactionsByAddress(List<Transaction> preload, String address, boolean convert) {
         List<Transaction> transactions;
         if(preload != null) {
+            logger.debug("Read transactions from preload by address: " + address);
             transactions = new LinkedList<>();
-            for(Transaction t : preload)
-                if(t.getAddress().equals(address))
+            for(Transaction t : preload) {
+                if (t.getAddress().equals(address)) {
                     transactions.add(t);
+                }
+            }
+            logger.debug("Found transactions:" + getHashLogLines(transactions));
         } else {
             transactions = findTransactionsByAddresses(new String[] {address});
         }
@@ -166,8 +165,11 @@ public class TangleAPI {
     }
 
     public String readTransactionMessage(String hash) {
+        logger.debug("Read Message of Transaction: " + hash);
         String transactionTrytes = readTransactionTrytes(hash);
-        return transactionTrytes != null ? TrytesConverter.trytesToAscii(transactionTrytes) : null;
+        String message = transactionTrytes != null ? TrytesConverter.trytesToAscii(transactionTrytes) : null;
+        logger.debug("Messsage found: " + message);
+        return message;
     }
 
     /**
@@ -176,7 +178,6 @@ public class TangleAPI {
      * @return transaction messages of the transaction found, NULL if not found
      * */
     public String readTransactionTrytes(String hash) {
-
         if(!TryteTool.isTryteSequence(hash))
             throw new InvalidParameterException("parameter hash is not a tryte sequence");
         if(hash.length() != 81)
@@ -187,6 +188,7 @@ public class TangleAPI {
 
         while (transactions == null) {
             try {
+                logger.debug("Read Transaction by Hash: " + hash);
                 transactions = wrappedAPI.findTransactionsObjectsByHashes(hashes);
             } catch (ArgumentException e) {
                 e.printStackTrace();
@@ -207,6 +209,7 @@ public class TangleAPI {
         trytes = trytes.split("99")[0];
         if(trytes.length()%2 == 1) trytes += "9";
 
+        logger.debug("Found Transaction Trytes: " + trytes);
         return trytes;
     }
 
@@ -232,7 +235,15 @@ public class TangleAPI {
         return mwm;
     }
 
-    public String getNodeAddress() {
-        return wrappedAPI.getProtocol() + "://" + wrappedAPI.getHost() + ":" + wrappedAPI.getPort();
+    private String getAddressLogLines(String[] addresses) {
+        StringBuilder stringBuilder = new StringBuilder();
+        Arrays.stream(addresses).forEach(a -> stringBuilder.append("\n").append(a));
+        return stringBuilder.toString();
+    }
+
+    private String getHashLogLines(List<Transaction> transactions) {
+        StringBuilder stringBuilder = new StringBuilder();
+        transactions.forEach(t -> stringBuilder.append("\n").append(t.getHash()));
+        return stringBuilder.toString();
     }
 }

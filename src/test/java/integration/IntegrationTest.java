@@ -29,7 +29,7 @@ public class IntegrationTest {
         int secondsHashPeriod = 30;
         int secondsRuntimeLimit = 10;
 
-        LOGGER.debug("Create Qubic");
+        LOGGER.info("Create Qubic");
         QubicWriter qubicWriter = new QubicWriter();
         EditableQubicSpecification specification = qubicWriter.getEditable();
         specification.setExecutionStartToSecondsInFuture(secondsToExecutionStart);
@@ -38,67 +38,67 @@ public class IntegrationTest {
         specification.setRuntimeLimit(secondsRuntimeLimit);
         specification.setCode("return(epoch^2);");
 
-        LOGGER.debug("Publish Qubic Transaction to Tangle Address: " + TryteTool.TEST_ADDRESS_1);
+        LOGGER.info("Publish Qubic Transaction to Tangle Address: " + TryteTool.TEST_ADDRESS_1);
         qubicWriter.publishQubicTransaction();
         String qubicId = qubicWriter.getID();
-        LOGGER.debug("Qubic ID (IAM Identity): " + qubicId);
-        LOGGER.debug("Qubic Transaction Hash: " + qubicWriter.getQubicTransactionHash());
+        LOGGER.info("Qubic ID (IAM Identity): " + qubicId);
+        LOGGER.info("Qubic Transaction Hash: " + qubicWriter.getQubicTransactionHash());
 
         List<OracleManager> oracleManagers = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
-            LOGGER.debug("Create Oracle " + i);
+            LOGGER.info("Create Oracle " + i);
             QubicReader qubicReader = new QubicReader(qubicId);
             OracleWriter oracleWriter = new OracleWriter(qubicReader, "Oracle" + i);
-            LOGGER.debug("Oracle ID (IAM Identity): " + oracleWriter.getID());
+            LOGGER.info("Oracle ID (IAM Identity): " + oracleWriter.getID());
             OracleManager oracleManager = new OracleManager(oracleWriter, "OracleManager" + i);
             oracleManagers.add(oracleManager);
-            LOGGER.debug("Start Oracle Lifecycle");
+            LOGGER.info("Start Oracle Lifecycle");
             oracleManager.start();
         }
 
-        LOGGER.debug("Wait for Oracles to Subscribe");
+        LOGGER.info("Wait for Oracles to Subscribe");
         Thread.sleep(secondsUntilAssemble);
 
-        LOGGER.debug("Fetch Application");
+        LOGGER.info("Fetch Application");
         List<JSONObject> applications = qubicWriter.fetchApplications();
         if (applications.size() == 0) {
-            LOGGER.debug("No Applications found");
+            LOGGER.info("No Applications found");
         }
 
         for (JSONObject application : applications) {
             String oracleID = application.getString(TangleJSONConstants.ORACLE_ID);
-            LOGGER.debug("Add Oracle to Assembly: " + oracleID);
-            LOGGER.debug(oracleID);
+            LOGGER.info("Add Oracle to Assembly: " + oracleID);
+            LOGGER.info(oracleID);
             qubicWriter.getAssembly().add(oracleID);
         }
 
-        LOGGER.debug("Publish Assembly Transaction");
+        LOGGER.info("Publish Assembly Transaction");
         qubicWriter.publishAssemblyTransaction();
-        LOGGER.debug("Assembly Transaction Hash: " + qubicWriter.getAssemblyTransactionHash());
+        LOGGER.info("Assembly Transaction Hash: " + qubicWriter.getAssemblyTransactionHash());
 
         QubicReader qubicReader = new QubicReader(qubicId);
-        LOGGER.debug("Read Assembly List");
+        LOGGER.info("Read Assembly List");
         for (String oracleId : qubicReader.getAssemblyList()) {
-            LOGGER.debug("Oracle Part of Assembly: " + oracleId);
+            LOGGER.info("Oracle Part of Assembly: " + oracleId);
         }
 
         for (int epoch = 0; epoch < 10; epoch++) {
-            LOGGER.debug("Waiting for Epoch " + epoch + " to complete");
+            LOGGER.info("Waiting for Epoch " + epoch + " to complete");
             while (qubicReader.lastCompletedEpoch() < epoch) {
                 Thread.sleep(1000);
             }
-            LOGGER.debug("Epoch " + epoch + " completed");
+            LOGGER.info("Epoch " + epoch + " completed");
 
-            LOGGER.debug("Fetch Quorum Based Result");
+            LOGGER.info("Fetch Quorum Based Result");
             QuorumBasedResult quorumBasedResult = InterQubicResultFetcher.fetchResultConsensus(qubicId, epoch);
 
             double quorum = quorumBasedResult.getQuorum();
             double quorumMax = quorumBasedResult.getQuorumMax();
             double percentage = Math.round(1000 * quorum / quorumMax) / 10;
 
-            LOGGER.debug("EPOCH:  " + epoch);
-            LOGGER.debug("RESULT: " + quorumBasedResult.getResult());
-            LOGGER.debug("QUORUM: " + quorum + " / " + quorumMax + " ("+percentage+"%)");
+            LOGGER.info("EPOCH:  " + epoch);
+            LOGGER.info("RESULT: " + quorumBasedResult.getResult());
+            LOGGER.info("QUORUM: " + quorum + " / " + quorumMax + " ("+percentage+"%)");
         }
     }
 }
