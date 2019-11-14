@@ -6,6 +6,7 @@ import iam.IAMIndex;
 import iam.IAMWriter;
 import org.json.JSONException;
 import org.json.JSONObject;
+import tangle.QubicPromotion;
 import tangle.TangleAPI;
 import tangle.TryteTool;
 import org.apache.logging.log4j.LogManager;
@@ -88,6 +89,10 @@ public class QubicWriter {
         String address = TryteTool.buildCurrentQubicPromotionAddress();
         logger.debug("Promote Qubic ID on Address: " + address);
         TangleAPI.getInstance().sendTrytes(address, writer.getID());
+    }
+
+    public void promote(String keyword) {
+        QubicPromotion.StoreQubicAddressToTangleWithKeyword(getID(), keyword);
     }
 
     /**

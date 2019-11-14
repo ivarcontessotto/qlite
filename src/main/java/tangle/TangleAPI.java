@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import java.net.MalformedURLException;
 import java.security.InvalidParameterException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author microhash
@@ -66,6 +67,10 @@ public class TangleAPI {
         this.mwm = mwm;
     }
 
+    public String sendTrytesWithTag(String tryteMessage, String tag) {
+        return sendTrytes(TryteTool.TEST_ADDRESS_1, tryteMessage, tag);
+    }
+
     /**
      * Sends a data transaction to the tangle. Keeps trying until there is no error.
      * @param address the address to which the transaction shall be attached
@@ -73,13 +78,24 @@ public class TangleAPI {
      * @return transaction hash of sent transaction
      * */
     public String sendTrytes(String address, String tryteMessage) {
+        return sendTrytes(address, tryteMessage, TAG);
+    }
+
+    /**
+     * Sends a data transaction to the tangle. Keeps trying until there is no error.
+     * @param address the address to which the transaction shall be attached
+     * @param tryteMessage the transaction message (in trytes)
+     * @param tag the tag of the message (in trytes)
+     * @return transaction hash of sent transaction
+     * */
+    public String sendTrytes(String address, String tryteMessage, String tag) {
 
         List<Transfer> transfers = new LinkedList<>();
-        transfers.add(new Transfer(address, 0, tryteMessage, TAG));
+        transfers.add(new Transfer(address, 0, tryteMessage, tag));
 
         while (true) {
             try {
-                logger.debug("Send Trytes\nAddress: " + address + "\nMessage: " + tryteMessage);
+                logger.debug("Send Trytes\nAddress: " + address + "\nMessage: " + tryteMessage + "\nTag: " + tag);
                 SendTransferResponse response = wrappedAPI.sendTransfer("", 1, 3, mwm, transfers,
                         null, null, true, false, null);
                 return response.getTransactions().get(0).getHash();
@@ -106,6 +122,15 @@ public class TangleAPI {
     public String sendMessage(String address, String message) {
         logger.debug("Send Message\nAddress: " + address + "\nMessage: " + message);
         return sendTrytes(address, TrytesConverter.asciiToTrytes(message));
+    }
+
+    public String sendMessageWithTag(String message, String tag) {
+        return sendMessageWithTag(TryteTool.TEST_ADDRESS_1, message, tag);
+    }
+
+    public String sendMessageWithTag(String address, String message, String tag) {
+        logger.debug("Send Message\nAddress: " + address + "\nMessage: " + message + "\nTag: " + tag);
+        return sendTrytes(address, TrytesConverter.asciiToTrytes(message), TrytesConverter.asciiToTrytes(tag));
     }
 
     /**
@@ -152,22 +177,16 @@ public class TangleAPI {
         Map<String, String> map = new HashMap<>();
 
         for(Transaction tx : transactions) {
-            String trytes = tx.getSignatureFragments();
-            trytes = trytes.split("99")[0];
-            if(trytes.length()%2 == 1) trytes += "9";
-            String message = convert ? TrytesConverter.trytesToAscii(trytes) : trytes;
-
-            map.put(tx.getHash(), message);
+            map.put(tx.getHash(), getTransactionMessage(tx, convert));
         }
         return map;
     }
 
-    public String readTransactionMessage(String hash) {
-        logger.debug("Read Message of Transaction: " + hash);
-        String transactionTrytes = readTransactionTrytes(hash);
-        String message = transactionTrytes != null ? TrytesConverter.trytesToAscii(transactionTrytes) : null;
-        logger.debug("Messsage found: " + message);
-        return message;
+    private String getTransactionMessage(Transaction transaction, Boolean convert) {
+        String trytes = transaction.getSignatureFragments();
+        trytes = trytes.split("99")[0];
+        if(trytes.length()%2 == 1) trytes += "9";
+        return convert ? TrytesConverter.trytesToAscii(trytes) : trytes;
     }
 
     /**
@@ -239,5 +258,10 @@ public class TangleAPI {
         StringBuilder stringBuilder = new StringBuilder();
         transactions.forEach(t -> stringBuilder.append("\n").append(t.getHash()));
         return stringBuilder.toString();
+    }
+
+    public List<String> findTransactionMessagesByKeyword(String keyword, Boolean convert) {
+        List<Transaction> foundTransactions = wrappedAPI.findTransactionObjectsByTag(TrytesConverter.asciiToTrytes(keyword));
+        return foundTransactions.stream().map(t -> getTransactionMessage(t, convert)).collect(Collectors.toList());
     }
 }

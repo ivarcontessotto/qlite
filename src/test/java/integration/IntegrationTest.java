@@ -11,6 +11,7 @@ import qubic.QubicReader;
 import qubic.QubicWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tangle.QubicPromotion;
 import tangle.TryteTool;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class IntegrationTest {
     @Test
     public void testEpochResultsIT() throws InterruptedException {
         int secondsToExecutionStart = 30;
-        int secondsUntilAssemble = 20;
+        int secondsUntilAssemble = 15;
         int secondsResultPeriod = 15;
         int secondsHashPeriod = 15;
         int secondsRuntimeLimit = 5;
@@ -44,10 +45,28 @@ public class IntegrationTest {
         LOGGER.info("Qubic ID (IAM Identity): " + qubicId);
         LOGGER.info("Qubic Transaction Hash: " + qubicWriter.getQubicTransactionHash());
 
+        LOGGER.info("Promote Qubic");
+        String keyword = "Wiprofun";
+        qubicWriter.promote(keyword);
+        Thread.sleep(2000);
+
         List<OracleManager> oracleManagers = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
+            LOGGER.info("Find promoted Qubic");
+            List<String> promotedQubics = QubicPromotion.GetQubicAddressesByKeyword(keyword);
+
+            QubicReader qubicReader;
+            if (promotedQubics.size() > 0) {
+                String firstPromotedQubicId = promotedQubics.get(0);
+                LOGGER.info("First Promoted Qubic found: " + firstPromotedQubicId + " for Oracle " + i);
+                qubicReader = new QubicReader(firstPromotedQubicId);
+            }
+            else {
+                LOGGER.info("No promoted Qubics found for Oracle " + i);
+                continue;
+            }
+
             LOGGER.info("Create Oracle " + i);
-            QubicReader qubicReader = new QubicReader(qubicId);
             OracleWriter oracleWriter = new OracleWriter(qubicReader, "Oracle" + i);
             LOGGER.info("Oracle ID (IAM Identity): " + oracleWriter.getID());
             OracleManager oracleManager = new OracleManager(oracleWriter, "OracleManager" + i);
@@ -87,6 +106,7 @@ public class IntegrationTest {
                 Thread.sleep(1000);
             }
             LOGGER.info("Epoch " + epoch + " completed");
+            Thread.sleep(1000);
 
             LOGGER.info("Fetch Quorum Based Result");
             QuorumBasedResult quorumBasedResult = InterQubicResultFetcher.fetchResultConsensus(qubicId, epoch);
