@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.zip.DeflaterOutputStream;
 
 public class ConsensusBuilder {
 
@@ -44,8 +45,9 @@ public class ConsensusBuilder {
     public QuorumBasedResult buildConsensus(List<OracleReader> selection, int epochIndex) {
         LOGGER.debug("Build Consensus");
 
-        if(selection == null)
+        if(selection == null) {
             selection = assembly.selectRandomOracleReaders(GeneralConstants.QUORUM_MAX_ORACLE_SELECTION_SIZE);
+        }
 
         // if epoch is ongoing or hasn't even started yet
         if(epochIndex < 0 || epochIndex > assembly.getQubicReader().lastCompletedEpoch()) {
@@ -55,6 +57,7 @@ public class ConsensusBuilder {
 
         // return result from history if already determined -> increases efficiency
         if(alreadyDeterminedQuorumBasedResults.keySet().contains(epochIndex)) {
+            LOGGER.debug("Getting Consensus from Cache");
             return alreadyDeterminedQuorumBasedResults.get(epochIndex);
         }
 
@@ -65,13 +68,26 @@ public class ConsensusBuilder {
         }
 
         // determine result
-        QuorumBasedResult quorumBasedResult = findVotingQuorum(accumulateEpochVotings(selection, epochIndex), selection.size());
+        LOGGER.debug("Accumulate Epoch Votings");
+        Map<String, Double> epochVotings = accumulateEpochVotings(selection, epochIndex);
+        logEpochVotings(epochVotings);
+
+        LOGGER.debug("Find Voting Quorum from accumulated Votings");
+        QuorumBasedResult quorumBasedResult = findVotingQuorum(epochVotings, selection.size());
+        LOGGER.debug("Quorum Based Result is: " + quorumBasedResult.getResult());
 
         // add result to list of already known results
         alreadyDeterminedQuorumBasedResults.put(epochIndex, quorumBasedResult);
 
-        LOGGER.debug("Quorum Bassed Result is: " + quorumBasedResult.getResult());
         return quorumBasedResult;
+    }
+
+    private void logEpochVotings(Map<String, Double> epochVotings) {
+        StringBuilder stringBuilder = new StringBuilder("Accumulated Epoch Votings:");
+        epochVotings.forEach((vote, nVoters) -> stringBuilder.append("\n").append("Vote: ").append(vote)
+        .append("\n").append("nVoters: ").append(nVoters));
+
+        LOGGER.debug(stringBuilder.toString());
     }
 
     public boolean hasAlreadyDeterminedQuorumBasedResult(int epochIndex) {
