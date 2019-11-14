@@ -115,14 +115,12 @@ public class TangleAPI {
      * */
     public List<Transaction> findTransactionsByAddresses(String[] addresses) {
         try {
-
             this.logger.debug("Find transactions by addresses:" + getAddressLogLines(addresses));
             List<Transaction> foundTransactions = wrappedAPI.findTransactionObjectsByAddresses(addresses);
             this.logger.debug("Found transactions:" + getHashLogLines(foundTransactions));
             return foundTransactions;
         } catch (ArgumentException e) {
             logger.error("Error reading transactions by addresses", e);
-            return null;
         } catch (NullPointerException e) {
             logger.error("Error reading transactions by addresses", e);
         }

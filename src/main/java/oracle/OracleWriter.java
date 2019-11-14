@@ -1,6 +1,5 @@
 package oracle;
 
-import com.sun.accessibility.internal.resources.accessibility;
 import constants.TangleJSONConstants;
 import iam.IAMIndex;
 import iam.IAMWriter;

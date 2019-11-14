@@ -23,11 +23,11 @@ public class IntegrationTest {
     @Ignore
     @Test
     public void testEpochResultsIT() throws InterruptedException {
-        int secondsToExecutionStart = 60;
-        int secondsUntilAssemble = 45;
-        int secondsResultPeriod = 30;
-        int secondsHashPeriod = 30;
-        int secondsRuntimeLimit = 10;
+        int secondsToExecutionStart = 30;
+        int secondsUntilAssemble = 20;
+        int secondsResultPeriod = 15;
+        int secondsHashPeriod = 15;
+        int secondsRuntimeLimit = 5;
 
         LOGGER.info("Create Qubic");
         QubicWriter qubicWriter = new QubicWriter();
@@ -57,7 +57,7 @@ public class IntegrationTest {
         }
 
         LOGGER.info("Wait for Oracles to Subscribe");
-        Thread.sleep(secondsUntilAssemble);
+        Thread.sleep(secondsUntilAssemble * 1000);
 
         LOGGER.info("Fetch Application");
         List<JSONObject> applications = qubicWriter.fetchApplications();
@@ -68,7 +68,6 @@ public class IntegrationTest {
         for (JSONObject application : applications) {
             String oracleID = application.getString(TangleJSONConstants.ORACLE_ID);
             LOGGER.info("Add Oracle to Assembly: " + oracleID);
-            LOGGER.info(oracleID);
             qubicWriter.getAssembly().add(oracleID);
         }
 
@@ -96,9 +95,9 @@ public class IntegrationTest {
             double quorumMax = quorumBasedResult.getQuorumMax();
             double percentage = Math.round(1000 * quorum / quorumMax) / 10;
 
-            LOGGER.info("EPOCH:  " + epoch);
-            LOGGER.info("RESULT: " + quorumBasedResult.getResult());
-            LOGGER.info("QUORUM: " + quorum + " / " + quorumMax + " ("+percentage+"%)");
+            LOGGER.info("EPOCH: " + epoch +
+                    ", RESULT: " + quorumBasedResult.getResult() +
+                    ", QUORUM: "  +  quorum + " / " + quorumMax + " ("+percentage+"%)" );
         }
     }
 }
