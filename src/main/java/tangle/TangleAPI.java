@@ -201,11 +201,7 @@ public class TangleAPI {
         if(transactions.size() == 0 || transactions.get(0).getHash().equals("999999999999999999999999999999999999999999999999999999999999999999999999999999999"))
             return null;
 
-        String trytes = transactions.get(0).getSignatureFragments();
-        // remove end
-        trytes = trytes.substring(0, trytes.length()-1);
-        trytes = trytes.split("99")[0];
-        if(trytes.length()%2 == 1) trytes += "9";
+        String trytes = TryteTool.removeEndFromSignatureFragments(transactions.get(0).getSignatureFragments());
 
         logger.debug("Found Transaction Trytes: " + trytes);
         return trytes;

@@ -14,6 +14,7 @@ import tangle.TryteTool;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 class IAMPacketFilter {
 
@@ -86,9 +87,11 @@ class IAMPacketFilter {
         }
 
         String[] hashes = convertHashBlockToHashes(split[0]);
-        if(hashes.length+1 > IAMStream.MAX_FRAGMENTS_PER_IAM_PACKET)
+
+        if(hashes.length+1 > IAMStream.MAX_FRAGMENTS_PER_IAM_PACKET) {
             throw new IllegalIAMPacketSizeException(rootTransaction.getHash());
-        return firstFragment + fetchFragmentsFromHashes(hashes);
+        }
+        return firstFragment + collectFollowingFragments(hashes);
     }
 
     private static String[] SplitOffHashBlockIfFirstFragmentOfPacket(String baseTxMsg) {
@@ -112,10 +115,17 @@ class IAMPacketFilter {
         return split;
     }
 
-    private String fetchFragmentsFromHashes(String[] hashes) {
+    private String collectFollowingFragments(String[] hashes) {
         StringBuilder fetchedMessage = new StringBuilder();
-        for(String hash : hashes)
-            fetchedMessage.append(TangleAPI.getInstance().readTransactionMessage(hash));
+        for(String hash : hashes) {
+            List<Transaction> matchingTransactions = selection.stream()
+                    .filter(t -> t.getHash().equals(hash)).collect(Collectors.toList());
+            if (matchingTransactions.size() > 0) {
+                String signatureFragments = matchingTransactions.get(0).getSignatureFragments();
+                String message = TrytesConverter.trytesToAscii(TryteTool.removeEndFromSignatureFragments(signatureFragments));
+                fetchedMessage.append(message);
+            }
+        }
         return fetchedMessage.toString();
     }
 

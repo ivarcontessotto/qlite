@@ -130,4 +130,11 @@ public class  TryteTool {
     private static int tryteToInt(char c) {
         return c-'A';
     }
+
+    public static String removeEndFromSignatureFragments(String trytes) {
+        trytes = trytes.substring(0, trytes.length()-1);
+        trytes = trytes.split("99")[0];
+        if(trytes.length()%2 == 1) trytes += "9";
+        return trytes;
+    }
 }

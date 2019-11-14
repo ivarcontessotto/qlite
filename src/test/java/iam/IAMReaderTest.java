@@ -16,7 +16,7 @@ public class IAMReaderTest {
     private final IAMReader iamReader = new IAMReader(iamWriter.getID());
 
     @Test
-    public void testPublishAndRead() {
+    public void testPublishAndRead() throws InterruptedException {
         testPublishAndReadObject(0, null);
         testPublishAndReadObject(1, "");
         testPublishAndReadObject(2, 4);
@@ -24,10 +24,11 @@ public class IAMReaderTest {
         testPublishAndReadObject(4, StringUtils.repeat("ok!\"9\'$3", 200));
     }
 
-    private void testPublishAndReadObject(int position, Object object) {
+    private void testPublishAndReadObject(int position, Object object) throws InterruptedException {
         IAMIndex index = new IAMIndex(position);
         JSONObject sent = new JSONObject().put("object", object);
         String hash = iamWriter.write(index, sent);
+        Thread.sleep(1000);
         JSONObject read = iamReader.read(index);
         assertEquals("hash of failed iam package: " + hash, String.valueOf(sent), String.valueOf(read));
     }
