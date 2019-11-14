@@ -5,6 +5,7 @@ import org.junit.Test;
 import qubic.EditableQubicSpecification;
 import qubic.QubicReader;
 import qubic.QubicWriter;
+import tangle.TryteTool;
 
 import static org.junit.Assert.*;
 
@@ -56,7 +57,7 @@ public class OracleReaderTest {
     }
 
     private static QubicWriter createQubicWriterWithPublishedQubicTransaction(String code) {
-        QubicWriter qubicWriter = new QubicWriter();
+        QubicWriter qubicWriter = new QubicWriter(TryteTool.TEST_ADDRESS_2);
         EditableQubicSpecification eqs =  qubicWriter.getEditable();
         eqs.setCode(code);
         qubicWriter.publishQubicTransaction();
@@ -65,7 +66,7 @@ public class OracleReaderTest {
 
     private static OracleWriter createOracleAndPublishResultStatement(QubicWriter qubicWriter, int position) {
         QubicReader qubicReader = new QubicReader(qubicWriter.getID());
-        OracleWriter oracleWriter = new OracleWriter(qubicReader, null);
+        OracleWriter oracleWriter = new OracleWriter(TryteTool.TEST_ADDRESS_2, qubicReader, null);
         qubicWriter.getAssembly().add(oracleWriter.getID());
         qubicWriter.publishAssemblyTransaction();
         oracleWriter.doHashStatement(position);

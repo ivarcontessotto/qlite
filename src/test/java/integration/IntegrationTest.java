@@ -13,6 +13,7 @@ import qubic.QubicWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tangle.QubicPromotion;
+import tangle.TangleAPI;
 import tangle.TryteTool;
 
 import java.io.File;
@@ -31,6 +32,10 @@ public class IntegrationTest {
     @Ignore
     @Test
     public void testEpochResultsIT() throws InterruptedException {
+        LOGGER.info("Generat Root Address for Test");
+        String rootAddressForTest = TangleAPI.getInstance().getNextUnspentAddressFromSeed(TryteTool.TEST_SEED);
+        LOGGER.info(rootAddressForTest);
+
         int secondsToExecutionStart = 30;
         int secondsUntilAssemble = 20;
         int secondsResultPeriod = 15;
@@ -38,7 +43,7 @@ public class IntegrationTest {
         int secondsRuntimeLimit = 5;
 
         LOGGER.info("Create Qubic");
-        QubicWriter qubicWriter = new QubicWriter();
+        QubicWriter qubicWriter = new QubicWriter(rootAddressForTest);
         EditableQubicSpecification specification = qubicWriter.getEditable();
         specification.setExecutionStartToSecondsInFuture(secondsToExecutionStart);
         specification.setResultPeriodDuration(secondsResultPeriod);
@@ -46,7 +51,8 @@ public class IntegrationTest {
         specification.setRuntimeLimit(secondsRuntimeLimit);
         specification.setCode("input=GetArgs(1);result=epoch^input;return(result);");
 
-        LOGGER.info("Publish Qubic Transaction to Tangle Address: " + TryteTool.TEST_ADDRESS_1);
+
+        LOGGER.info("Publish Qubic Transaction to Tangle Address: " + rootAddressForTest);
         qubicWriter.publishQubicTransaction();
         String qubicId = qubicWriter.getID();
         LOGGER.info("Qubic ID (IAM Identity): " + qubicId);
@@ -54,7 +60,7 @@ public class IntegrationTest {
 
         LOGGER.info("Promote Qubic");
         String keyword = "Wiprofun";
-        qubicWriter.promote(keyword);
+        qubicWriter.promote(rootAddressForTest, keyword);
         Thread.sleep(3000);
 
         List<OracleManager> oracleManagers = new ArrayList<>();
@@ -78,7 +84,7 @@ public class IntegrationTest {
             createArgsFile(argsFilePath, Arrays.asList(1, 2, 3));
 
             LOGGER.info("Create Oracle " + i);
-            OracleWriter oracleWriter = new OracleWriter(qubicReader, argsFilePath, "Oracle" + i);
+            OracleWriter oracleWriter = new OracleWriter(rootAddressForTest, qubicReader, argsFilePath, "Oracle" + i);
             LOGGER.info("Oracle ID (IAM Identity): " + oracleWriter.getID());
             OracleManager oracleManager = new OracleManager(oracleWriter, "OracleManager" + i);
             oracleManagers.add(oracleManager);

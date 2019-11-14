@@ -1,6 +1,8 @@
 package tangle;
 
+import org.iota.jota.builder.AddressRequest;
 import org.iota.jota.connection.HttpConnector;
+import org.iota.jota.dto.response.GetNewAddressResponse;
 import org.iota.jota.pow.pearldiver.PearlDiverLocalPoW;
 import org.iota.jota.IotaAPI;
 import org.iota.jota.dto.response.GetBalancesResponse;
@@ -67,10 +69,6 @@ public class TangleAPI {
         this.mwm = mwm;
     }
 
-    public String sendTrytesWithTag(String tryteMessage, String tag) {
-        return sendTrytes(TryteTool.TEST_ADDRESS_1, tryteMessage, tag);
-    }
-
     /**
      * Sends a data transaction to the tangle. Keeps trying until there is no error.
      * @param address the address to which the transaction shall be attached
@@ -111,21 +109,9 @@ public class TangleAPI {
         }
     }
 
-    public String sendTrytes(String tryteMessage) {
-        return sendTrytes(TryteTool.TEST_ADDRESS_1, tryteMessage);
-    }
-
-    public String sendMessage(String message) {
-        return sendMessage(TryteTool.TEST_ADDRESS_1, message);
-    }
-
     public String sendMessage(String address, String message) {
         logger.debug("Send Message\nAddress: " + address + "\nMessage: " + message);
         return sendTrytes(address, TrytesConverter.asciiToTrytes(message));
-    }
-
-    public String sendMessageWithTag(String message, String tag) {
-        return sendMessageWithTag(TryteTool.TEST_ADDRESS_1, message, tag);
     }
 
     public String sendMessageWithTag(String address, String message, String tag) {
@@ -266,5 +252,11 @@ public class TangleAPI {
                 .sorted(new TransactionTimestampComparator().reversed())
                 .map(t -> getTransactionMessage(t, convert))
                 .collect(Collectors.toList());
+    }
+
+    public String getNextUnspentAddressFromSeed(String seed) {
+        AddressRequest addressRequest = new AddressRequest.Builder(seed, 1).checksum(true).amount(1).build();
+        GetNewAddressResponse firstAddressResponse = wrappedAPI.generateNewAddresses(addressRequest);
+        return firstAddressResponse.getAddresses().get(0);
     }
 }

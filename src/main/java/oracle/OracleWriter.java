@@ -42,25 +42,27 @@ public class OracleWriter {
 
     /**
      * Creates a new IAMStream identity for this oracle.
+     * @param publishAddress the address where to publish the oracle id.
      * @param qubicReader qubic to be processed
      * @param argsFilePath path to the args file
      * */
-    public OracleWriter(QubicReader qubicReader, Path argsFilePath) {
-        this(qubicReader, argsFilePath, "")
+    public OracleWriter(String publishAddress, QubicReader qubicReader, Path argsFilePath) {
+        this(publishAddress, qubicReader, argsFilePath, "")
 ;    }
 
     /**
      * Creates a new IAMStream identity for this oracle.
+     * @param publishAddress the address where to publish the oracle id.
      * @param qubicReader qubic to be processed
      * @param argsFilePath path to the args file
      * @param loggerName name of the oracle writer logger.
      * */
-    public OracleWriter(QubicReader qubicReader, Path argsFilePath, String loggerName) {
+    public OracleWriter(String publishAddress, QubicReader qubicReader, Path argsFilePath, String loggerName) {
         this.argsFilePath = argsFilePath;
         this.logger = loggerName.equals("") ? LogManager.getLogger(OracleWriter.class) : LogManager.getLogger(loggerName);
         this.qubicReader = qubicReader;
         assembly = new Assembly(qubicReader);
-        writer = new IAMWriter();
+        writer = new IAMWriter(publishAddress);
         hashStatementWriter = new HastStatementWriter(writer);
         resultStatementWriter = new ResultStatementWriter(writer);
     }

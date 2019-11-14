@@ -38,8 +38,8 @@ public class QubicWriter {
 
     private QubicWriterState state = QubicWriterState.PRE_ASSEMBLY_PHASE;
 
-    public QubicWriter() {
-        writer = new IAMWriter();
+    public QubicWriter(String publishAddress) {
+        writer = new IAMWriter(publishAddress);
         editable = new EditableQubicSpecification();
     }
 
@@ -91,8 +91,8 @@ public class QubicWriter {
         TangleAPI.getInstance().sendTrytes(address, writer.getID());
     }
 
-    public void promote(String keyword) {
-        QubicPromotion.StoreQubicAddressToTangleWithKeyword(getID(), keyword);
+    public void promote(String publishAddress, String keyword) {
+        QubicPromotion.StoreQubicAddressToTangleWithKeyword(publishAddress, getID(), keyword);
     }
 
     /**

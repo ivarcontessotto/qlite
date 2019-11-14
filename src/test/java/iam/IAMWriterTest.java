@@ -18,7 +18,7 @@ public class IAMWriterTest {
     private final int MAX_CHARS_PER_FRAGMENT;
     private final int MIN_CHARS_OF_HASHBLOCK;
 
-    private final IAMWriter iamWriter = new IAMWriter();
+    private final IAMWriter iamWriter = new IAMWriter(TryteTool.TEST_ADDRESS_2);
 
     // === CONSTRUCTION ===
 

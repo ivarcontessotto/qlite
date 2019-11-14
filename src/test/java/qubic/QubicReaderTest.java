@@ -1,6 +1,7 @@
 package qubic;
 
 import org.junit.Test;
+import tangle.TryteTool;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -10,7 +11,7 @@ public class QubicReaderTest {
     @Test
     public void testReadQubicTransaction() {
 
-        QubicWriter qubicWriter = new QubicWriter();
+        QubicWriter qubicWriter = new QubicWriter(TryteTool.TEST_ADDRESS_2);
         EditableQubicSpecification eqs = qubicWriter.getEditable();
 
         final int runtimeLimit = 9;

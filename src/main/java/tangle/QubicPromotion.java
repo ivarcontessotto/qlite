@@ -5,8 +5,8 @@ import java.util.List;
 
 public class QubicPromotion {
 
-    public static String StoreQubicAddressToTangleWithKeyword(String qubicId, String keyword){
-        return TangleAPI.getInstance().sendMessageWithTag(qubicId, keyword);
+    public static String StoreQubicAddressToTangleWithKeyword(String publishAddress, String qubicId, String keyword){
+        return TangleAPI.getInstance().sendMessageWithTag(publishAddress, qubicId, keyword);
     }
 
     public static List<String> GetQubicAddressesByKeyword(String keyword){

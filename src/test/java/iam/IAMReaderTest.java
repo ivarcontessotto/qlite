@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
+import tangle.TryteTool;
 
 
 import javax.swing.*;
@@ -12,7 +13,7 @@ import static org.junit.Assert.*;
 
 public class IAMReaderTest {
 
-    private final IAMWriter iamWriter = new IAMWriter();
+    private final IAMWriter iamWriter = new IAMWriter(TryteTool.TEST_ADDRESS_2);
     private final IAMReader iamReader = new IAMReader(iamWriter.getID());
 
     @Test
