@@ -116,7 +116,7 @@ public class OracleWriter {
     }
 
     private void updateListenersWithPreviousEpoch(int previousEpochIndex) {
-        QuorumBasedResult qbr = assembly.getConsensusBuilder().buildConsensus(previousEpochIndex-1);
+        QuorumBasedResult qbr = assembly.getConsensusBuilder().buildConsensus(previousEpochIndex);
         for (OracleListener qf : oracleListeners){
             qf.onReceiveEpochResult(previousEpochIndex, qbr);
         }
