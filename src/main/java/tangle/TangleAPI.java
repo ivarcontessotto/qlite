@@ -262,6 +262,9 @@ public class TangleAPI {
 
     public List<String> findTransactionMessagesByKeyword(String keyword, Boolean convert) {
         List<Transaction> foundTransactions = wrappedAPI.findTransactionObjectsByTag(TrytesConverter.asciiToTrytes(keyword));
-        return foundTransactions.stream().map(t -> getTransactionMessage(t, convert)).collect(Collectors.toList());
+        return foundTransactions.stream()
+                .sorted(new TransactionTimestampComparator().reversed())
+                .map(t -> getTransactionMessage(t, convert))
+                .collect(Collectors.toList());
     }
 }

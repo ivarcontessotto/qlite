@@ -8,6 +8,7 @@ import qlvm.exceptions.runtime.*;
 import qlvm.functions.operations.LogicOperations;
 import qlvm.functions.operations.MathOperations;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -53,6 +54,7 @@ public class QLVM {
     private final ArrayList<String> stringTable = new ArrayList<>();
     private final HashMap<String, String> variables = new HashMap<>();
     private final OracleWriter oracleWriter;
+    private final Path arsFilePath;
 
     private boolean interrupted = false;
     private final boolean inTestMode;
@@ -61,11 +63,12 @@ public class QLVM {
      * Runs code in the context of a specific OracleWriter.
      * @param code the code to run
      * @param oracleWriter the oracleWriter to use as context
+     * @param argsFilePath the args file path
      * */
-    public static String run(String code, OracleWriter oracleWriter, int epochIndex) {
+    public static String run(String code, OracleWriter oracleWriter, int epochIndex, Path argsFilePath) {
 
         final ObjectContainer oc = new ObjectContainer(null);
-        final QLVM qlvm = new QLVM(oracleWriter, epochIndex);
+        final QLVM qlvm = new QLVM(oracleWriter, epochIndex, argsFilePath);
 
         Thread t = new Thread() {
             @Override
@@ -107,11 +110,12 @@ public class QLVM {
     }
 
     public static String testRun(String code, int epoch) {
-        QLVM qlvm = new QLVM(epoch);
+        QLVM qlvm = new QLVM(epoch, null);
         return qlvm.executeProgram(code);
     }
 
-    private QLVM(OracleWriter oracleWriter, int epochIndex) {
+    private QLVM(OracleWriter oracleWriter, int epochIndex, Path argsFilePath) {
+        this.arsFilePath = argsFilePath;
         this.oracleWriter = oracleWriter;
         variables.put("epoch", ""+epochIndex);
         variables.put("qubic", "'"+oracleWriter.getQubicReader().getID()+"'");
@@ -121,11 +125,16 @@ public class QLVM {
     /**
      * Just for local testing purposes.
      * */
-    private QLVM(int epoch) {
+    private QLVM(int epoch, Path argsFilePath) {
+        this.arsFilePath = argsFilePath;
         this.oracleWriter = null;
         variables.put("epoch", ""+epoch);
         variables.put("qubic", null);
         inTestMode = true;
+    }
+
+    public Path getArgsFilePath() {
+        return this.arsFilePath;
     }
 
     private void interrupt() {

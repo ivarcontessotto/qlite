@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
 import qlvm.InterQubicResultFetcher;
+import qlvm.QLVM;
 import qubic.EditableQubicSpecification;
 import qubic.QubicReader;
 import qubic.QubicWriter;
@@ -14,7 +15,14 @@ import org.apache.logging.log4j.Logger;
 import tangle.QubicPromotion;
 import tangle.TryteTool;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class IntegrationTest {
@@ -25,10 +33,10 @@ public class IntegrationTest {
     @Test
     public void testEpochResultsIT() throws InterruptedException {
         int secondsToExecutionStart = 30;
-        int secondsUntilAssemble = 15;
-        int secondsResultPeriod = 15;
-        int secondsHashPeriod = 15;
-        int secondsRuntimeLimit = 5;
+        int secondsUntilAssemble = 20;
+        int secondsResultPeriod = 20;
+        int secondsHashPeriod = 20;
+        int secondsRuntimeLimit = 10;
 
         LOGGER.info("Create Qubic");
         QubicWriter qubicWriter = new QubicWriter();
@@ -37,7 +45,7 @@ public class IntegrationTest {
         specification.setResultPeriodDuration(secondsResultPeriod);
         specification.setHashPeriodDuration(secondsHashPeriod);
         specification.setRuntimeLimit(secondsRuntimeLimit);
-        specification.setCode("return(epoch^2);");
+        specification.setCode("return(GetArgs(1)^epoch);");
 
         LOGGER.info("Publish Qubic Transaction to Tangle Address: " + TryteTool.TEST_ADDRESS_1);
         qubicWriter.publishQubicTransaction();
@@ -66,8 +74,12 @@ public class IntegrationTest {
                 continue;
             }
 
+            Path argsFilePath = Paths.get("argsfile" + i + ".txt");
+            LOGGER.info("Create Args File: " + argsFilePath.toAbsolutePath().toString());
+            createArgsFile(argsFilePath, Arrays.asList(1, 2, 3));
+
             LOGGER.info("Create Oracle " + i);
-            OracleWriter oracleWriter = new OracleWriter(qubicReader, "Oracle" + i);
+            OracleWriter oracleWriter = new OracleWriter(qubicReader, argsFilePath, "Oracle" + i);
             LOGGER.info("Oracle ID (IAM Identity): " + oracleWriter.getID());
             OracleManager oracleManager = new OracleManager(oracleWriter, "OracleManager" + i);
             oracleManagers.add(oracleManager);
@@ -118,6 +130,20 @@ public class IntegrationTest {
             LOGGER.info("EPOCH: " + epoch +
                     ", RESULT: " + quorumBasedResult.getResult() +
                     ", QUORUM: "  +  quorum + " / " + quorumMax + " ("+percentage+"%)" );
+        }
+    }
+
+    private static void createArgsFile(Path argsFilePath, List<Integer> argsList) {
+        File argsFile = argsFilePath.toFile();
+        if (argsFile.exists()) {
+            argsFile.delete();
+        }
+
+        try (PrintWriter out = new PrintWriter(argsFilePath.toFile())) {
+            argsList.forEach(a -> out.println(a.toString()));
+        } catch (IOException e) {
+            LOGGER.error("Could not create new argsfile", e);
+
         }
     }
 }

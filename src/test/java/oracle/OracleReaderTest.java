@@ -65,7 +65,7 @@ public class OracleReaderTest {
 
     private static OracleWriter createOracleAndPublishResultStatement(QubicWriter qubicWriter, int position) {
         QubicReader qubicReader = new QubicReader(qubicWriter.getID());
-        OracleWriter oracleWriter = new OracleWriter(qubicReader);
+        OracleWriter oracleWriter = new OracleWriter(qubicReader, null);
         qubicWriter.getAssembly().add(oracleWriter.getID());
         qubicWriter.publishAssemblyTransaction();
         oracleWriter.doHashStatement(position);

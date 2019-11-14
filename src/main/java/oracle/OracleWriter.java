@@ -18,11 +18,14 @@ import tangle.TangleAPI;
 import tangle.TryteTool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
 public class OracleWriter {
 
+    private final Path argsFilePath;
     private OracleManager manager;
     private ResultStatement currentlyProcessedResult;
     private final QubicReader qubicReader;
@@ -40,17 +43,20 @@ public class OracleWriter {
     /**
      * Creates a new IAMStream identity for this oracle.
      * @param qubicReader qubic to be processed
+     * @param argsFilePath path to the args file
      * */
-    public OracleWriter(QubicReader qubicReader) {
-        this(qubicReader, "")
+    public OracleWriter(QubicReader qubicReader, Path argsFilePath) {
+        this(qubicReader, argsFilePath, "")
 ;    }
 
     /**
      * Creates a new IAMStream identity for this oracle.
      * @param qubicReader qubic to be processed
+     * @param argsFilePath path to the args file
      * @param loggerName name of the oracle writer logger.
      * */
-    public OracleWriter(QubicReader qubicReader, String loggerName) {
+    public OracleWriter(QubicReader qubicReader, Path argsFilePath, String loggerName) {
+        this.argsFilePath = argsFilePath;
         this.logger = loggerName.equals("") ? LogManager.getLogger(OracleWriter.class) : LogManager.getLogger(loggerName);
         this.qubicReader = qubicReader;
         assembly = new Assembly(qubicReader);
@@ -63,8 +69,10 @@ public class OracleWriter {
      * Recreates an already existing Qubic by its IAMStream identity.
      * @param qubicReader       qubic to be processed
      * @param writer            IAM writer of the oracle
+     * @param argsFilePath path to the args file
      * */
-    public OracleWriter(QubicReader qubicReader, IAMWriter writer) {
+    public OracleWriter(QubicReader qubicReader, IAMWriter writer, Path argsFilePath) {
+        this.argsFilePath = argsFilePath;
         this.logger = LogManager.getLogger(OracleWriter.class);
         this.qubicReader = qubicReader;
         assembly = new Assembly(qubicReader);
@@ -178,7 +186,7 @@ public class OracleWriter {
      * @return result string for current epoch
      * */
     private String calcResult(int epochIndex) {
-        return QLVM.run(qubicReader.getSpecification().getCode(), OracleWriter.this, epochIndex);
+        return QLVM.run(qubicReader.getSpecification().getCode(), OracleWriter.this, epochIndex, this.argsFilePath);
     }
 
     /**
