@@ -16,7 +16,6 @@ import tangle.QubicPromotion;
 import tangle.TryteTool;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
@@ -34,9 +33,9 @@ public class IntegrationTest {
     public void testEpochResultsIT() throws InterruptedException {
         int secondsToExecutionStart = 30;
         int secondsUntilAssemble = 20;
-        int secondsResultPeriod = 20;
-        int secondsHashPeriod = 20;
-        int secondsRuntimeLimit = 10;
+        int secondsResultPeriod = 15;
+        int secondsHashPeriod = 15;
+        int secondsRuntimeLimit = 5;
 
         LOGGER.info("Create Qubic");
         QubicWriter qubicWriter = new QubicWriter();
@@ -45,7 +44,7 @@ public class IntegrationTest {
         specification.setResultPeriodDuration(secondsResultPeriod);
         specification.setHashPeriodDuration(secondsHashPeriod);
         specification.setRuntimeLimit(secondsRuntimeLimit);
-        specification.setCode("return(GetArgs(1)^epoch);");
+        specification.setCode("input=GetArgs(1);result=epoch^input;return(result);");
 
         LOGGER.info("Publish Qubic Transaction to Tangle Address: " + TryteTool.TEST_ADDRESS_1);
         qubicWriter.publishQubicTransaction();
@@ -56,7 +55,7 @@ public class IntegrationTest {
         LOGGER.info("Promote Qubic");
         String keyword = "Wiprofun";
         qubicWriter.promote(keyword);
-        Thread.sleep(2000);
+        Thread.sleep(3000);
 
         List<OracleManager> oracleManagers = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
@@ -74,7 +73,7 @@ public class IntegrationTest {
                 continue;
             }
 
-            Path argsFilePath = Paths.get("argsfile" + i + ".txt");
+            Path argsFilePath = Paths.get("./src/test/res/argsfile" + i + ".txt");
             LOGGER.info("Create Args File: " + argsFilePath.toAbsolutePath().toString());
             createArgsFile(argsFilePath, Arrays.asList(1, 2, 3));
 
