@@ -49,7 +49,7 @@ public class IntegrationTest {
         specification.setResultPeriodDuration(secondsResultPeriod);
         specification.setHashPeriodDuration(secondsHashPeriod);
         specification.setRuntimeLimit(secondsRuntimeLimit);
-        specification.setCode("input=GetArgs(1);result=epoch^input;return(result);");
+        specification.setCode("kmh=GetArgs(0);if(kmh<=10){traffic='stau';}else{traffic='normal';}return(traffic);");
 
 
         LOGGER.info("Publish Qubic Transaction to Tangle Address: " + rootAddressForTest);
@@ -81,7 +81,7 @@ public class IntegrationTest {
 
             Path argsFilePath = Paths.get("./src/test/res/argsfile" + i + ".txt");
             LOGGER.info("Create Args File: " + argsFilePath.toAbsolutePath().toString());
-            createArgsFile(argsFilePath, Arrays.asList(1, 2, 3));
+            createArgsFile(argsFilePath, Arrays.asList(50));
 
             LOGGER.info("Create Oracle " + i);
             OracleWriter oracleWriter = new OracleWriter(rootAddressForTest, qubicReader, argsFilePath, "Oracle" + i);
