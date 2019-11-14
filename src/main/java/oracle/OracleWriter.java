@@ -1,5 +1,6 @@
 package oracle;
 
+import com.sun.accessibility.internal.resources.accessibility;
 import constants.TangleJSONConstants;
 import iam.IAMIndex;
 import iam.IAMWriter;
@@ -48,10 +49,10 @@ public class OracleWriter {
     /**
      * Creates a new IAMStream identity for this oracle.
      * @param qubicReader qubic to be processed
-     * @param name name of the oracle writer. For better logging.
+     * @param loggerName name of the oracle writer logger.
      * */
-    public OracleWriter(QubicReader qubicReader, String name) {
-        this.logger = name.equals("") ? LogManager.getLogger(OracleWriter.class) : LogManager.getLogger(name);
+    public OracleWriter(QubicReader qubicReader, String loggerName) {
+        this.logger = loggerName.equals("") ? LogManager.getLogger(OracleWriter.class) : LogManager.getLogger(loggerName);
         this.qubicReader = qubicReader;
         assembly = new Assembly(qubicReader);
         writer = new IAMWriter();
@@ -84,18 +85,15 @@ public class OracleWriter {
      * They have to publish the hash of their result before the actual quorum based result can be revealed
      * */
     public void doHashStatement(int epochIndex) {
-
         // Results from last epoch may be needed for calculating new result.
         if(epochIndex > 0) {
-            logger.debug("Fetch Last Epoch Result Statements");
             fetchStatements(new ResultStatementIAMIndex(epochIndex-1));
         }
 
         logger.debug("Calculate current Epoch Result and Hash");
         this.currentlyProcessedResult = new ResultStatement(epochIndex, calcResult(epochIndex));
         String hash = ResultHasher.hash(this.currentlyProcessedResult);
-        logger.debug("Result: " + this.currentlyProcessedResult.getContent());
-        logger.debug("Result Hash: " + hash);
+        logger.debug("Result: " + this.currentlyProcessedResult.getContent() + " Hash: " + hash);
 
         int[] ratings = assembly.getRatings();
         logger.debug("Write Hash Statement");
@@ -111,7 +109,6 @@ public class OracleWriter {
     private void updateListenersWithPreviousEpoch(int previousEpochIndex) {
         QuorumBasedResult qbr = assembly.getConsensusBuilder().buildConsensus(previousEpochIndex-1);
         for (OracleListener qf : oracleListeners){
-            logger.debug("Quorum based result: " + qbr.getResult());
             qf.onReceiveEpochResult(previousEpochIndex, qbr);
         }
     }
@@ -166,6 +163,7 @@ public class OracleWriter {
     private void sendApplication() {
         JSONObject application = generateApplication();
         String applicationAddress = qubicReader.getApplicationAddress();
+        logger.debug("Apply to Qubic. Application Address: " + applicationAddress);
         TangleAPI.getInstance().sendMessage(applicationAddress, application.toString());
     }
 
@@ -191,10 +189,19 @@ public class OracleWriter {
      * */
     public boolean assemble() {
         List<String> acceptedOracles = qubicReader.getAssemblyList();
+        logger.debug("Read Assemby List:" + getOracleIdLogLines(acceptedOracles));
         boolean accepted = acceptedOracles != null && acceptedOracles.contains(getID());
-        if(accepted && assembly.size() == 0)
+        if(accepted && assembly.size() == 0) {
             assembly.addOracles(acceptedOracles);
+        }
+        logger.debug("Is accepted into Assembly: "  + accepted);
         return accepted;
+    }
+
+    private String getOracleIdLogLines(List<String> oracleIds) {
+        StringBuilder stringBuilder = new StringBuilder();
+        oracleIds.forEach(id -> stringBuilder.append("\n").append(id));
+        return stringBuilder.toString();
     }
 
     public boolean isAcceptedIntoAssembly() {

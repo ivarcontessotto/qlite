@@ -9,7 +9,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,21 +42,27 @@ public class ConsensusBuilder {
      * @return quorum based result
      * */
     public QuorumBasedResult buildConsensus(List<OracleReader> selection, int epochIndex) {
+        LOGGER.debug("Build Consensus");
 
         if(selection == null)
             selection = assembly.selectRandomOracleReaders(GeneralConstants.QUORUM_MAX_ORACLE_SELECTION_SIZE);
 
         // if epoch is ongoing or hasn't even started yet
-        if(epochIndex < 0 || epochIndex > assembly.getQubicReader().lastCompletedEpoch())
+        if(epochIndex < 0 || epochIndex > assembly.getQubicReader().lastCompletedEpoch()) {
+            LOGGER.debug("Consensus not ready yet. Epoch not finished");
             return new QuorumBasedResult(0, selection.size(),null);
+        }
 
         // return result from history if already determined -> increases efficiency
-        if(alreadyDeterminedQuorumBasedResults.keySet().contains(epochIndex))
+        if(alreadyDeterminedQuorumBasedResults.keySet().contains(epochIndex)) {
             return alreadyDeterminedQuorumBasedResults.get(epochIndex);
+        }
 
         // empty assembly
-        if(selection.size() == 0)
+        if(selection.size() == 0) {
+            LOGGER.debug("Consensus null because assembly size 0");
             return new QuorumBasedResult(0, 0, null);
+        }
 
         // determine result
         QuorumBasedResult quorumBasedResult = findVotingQuorum(accumulateEpochVotings(selection, epochIndex), selection.size());
@@ -65,6 +70,7 @@ public class ConsensusBuilder {
         // add result to list of already known results
         alreadyDeterminedQuorumBasedResults.put(epochIndex, quorumBasedResult);
 
+        LOGGER.debug("Quorum Bassed Result is: " + quorumBasedResult.getResult());
         return quorumBasedResult;
     }
 

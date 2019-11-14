@@ -45,23 +45,18 @@ public class OracleManager {
      * */
     public void startSynchronous() {
         logger.debug("Start Oracle Lifecycle");
-
         logger.debug("Lifecycle State: Pre-Execution");
         state = State.PRE_EXECUTION;
 
         if(ow.getQubicReader().getSpecification().timeUntilExecutionStart() > 0) {
-            logger.debug("Apply Oracle to Qubic");
             ow.apply();
             logger.debug("Wait For Execution Start");
             takeABreak(ow.getQubicReader().getSpecification().timeUntilExecutionStart());
         }
 
-        logger.debug("Check if Oracle is Part of Assembly");
         if(ow.assemble()) {
-            logger.debug("Success! Made it into Assembly");
             runEpochs();
         } else {
-            logger.debug("Sadface! Not Part of Assembly");
             logger.debug("Lifecycle State: Aborted");
             state = State.ABORTED;
         }
@@ -77,7 +72,7 @@ public class OracleManager {
         if(!ow.isAcceptedIntoAssembly())
             return;
 
-        logger.debug("Lifecycle State: Running");
+        logger.debug("Lyfecycle State: Running");
         state = State.RUNNING;
         while(state != State.PAUSING)
             runEpochAndCatchThrowable();
@@ -99,20 +94,17 @@ public class OracleManager {
         final QubicReader qubic = ow.getQubicReader();
         final QubicSpecification spec =  qubic.getSpecification();
 
-        logger.debug("Determine Epoch to Run");
         final int epoch = determineEpochToRun();
         logger.debug("Run Epoch: " + epoch);
 
         final long epochStart = spec.getExecutionStartUnix() + epoch * spec.getEpochDuration();
 
         // run hash epoch
-        logger.debug("Wait for Hash Epoch Start");
         takeABreak(epochStart - getUnixTimeStamp());
         logger.debug("Run Hash Epoch");
         ow.doHashStatement(epoch);
 
         // run result epoch
-        logger.debug("Wait for Result Epoch Start");
         takeABreak(epochStart - getUnixTimeStamp() + spec.getHashPeriodDuration());
         logger.debug("Run Result Epoch");
         ow.doResultStatement();

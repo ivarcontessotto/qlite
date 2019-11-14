@@ -4,11 +4,12 @@ import constants.TangleJSONConstants;
 import exceptions.NoQubicTransactionException;
 import iam.IAMIndex;
 import iam.IAMWriter;
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import tangle.TangleAPI;
 import tangle.TryteTool;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -32,6 +33,7 @@ public class QubicWriter {
     private String qubicTransactionHash, assemblyTransactionHash;
     private final EditableQubicSpecification editable;
     private QubicSpecification finalSpecification;
+    private final Logger logger = LogManager.getLogger(QubicWriter.class);
 
     private QubicWriterState state = QubicWriterState.PRE_ASSEMBLY_PHASE;
 
@@ -73,6 +75,8 @@ public class QubicWriter {
 
         finalSpecification = new QubicSpecification(editable);
         JSONObject qubicTransactionJSON = finalSpecification.generateQubicTransactionJSON();
+
+        logger.debug("Write Qubic Transaction");
         qubicTransactionHash = writer.write(QUBIC_TRANSACTION_IAM_INDEX, qubicTransactionJSON);
         state = QubicWriterState.ASSEMBLY_PHASE;
     }
@@ -82,6 +86,7 @@ public class QubicWriter {
      * */
     public void promote() {
         String address = TryteTool.buildCurrentQubicPromotionAddress();
+        logger.debug("Promote Qubic ID on Address: " + address);
         TangleAPI.getInstance().sendTrytes(address, writer.getID());
     }
 
@@ -92,6 +97,7 @@ public class QubicWriter {
     public synchronized void publishAssemblyTransaction() {
         throwExceptionIfCannotPublishAssemblyTransaction();
         JSONObject assemblyTransaction = generateAssemblyTransaction(assembly);
+        logger.debug("Write Assemly Transaction");
         assemblyTransactionHash = writer.write(ASSEMBLY_TRANSACTION_IAM_INDEX, assemblyTransaction);
         state = QubicWriterState.EXECUTION_PHASE;
     }
@@ -109,9 +115,18 @@ public class QubicWriter {
      * @return the fetched applications
      * */
     public List<JSONObject> fetchApplications() {
+        logger.debug("Fetch Applications");
         Collection<String> transactionMessagesOnApplicationAddress = TangleAPI.getInstance().readTransactionsByAddress(
                 null, getApplicationAddress(), true).values();
-        return filterValidApplicationsFromTransactionMessages(transactionMessagesOnApplicationAddress);
+        List<JSONObject> applications = filterValidApplicationsFromTransactionMessages(transactionMessagesOnApplicationAddress);
+        logger.debug("Found Applications:" + getApplicationLogLines(applications));
+        return applications;
+    }
+
+    private String getApplicationLogLines(List<JSONObject> applications) {
+        StringBuilder stringBuilder = new StringBuilder();
+        applications.forEach(a -> stringBuilder.append("\n").append(a));
+        return stringBuilder.toString();
     }
 
     private List<JSONObject> filterValidApplicationsFromTransactionMessages(Iterable<String> uncheckedTransactionMessages) {
