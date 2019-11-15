@@ -129,16 +129,28 @@ public class ConsensusBuilder {
 
     private static void addOraclesVoteToVoting(OracleReader oracleReader, int epochIndex, Map<String, Double> voting) {
         ResultStatement resultStatement = oracleReader.getResultStatementReader().read(epochIndex);
-        LOGGER.debug("Fetched Oracles Vote:\nOracle: "  + oracleReader.getID() +
-                "\nResult: " + resultStatement.getContent() +
-                "\nNonce: " + resultStatement.getNonce() +
-                "\nHash: " + resultStatement.getHashStatement().getContent());
+        LOGGER.debug("Fetched Result Statement of Oracle: " + oracleReader.getID());
+        logResultStatement(resultStatement);
 
-        if(resultStatement.isHashStatementValid()) {
+        if(resultStatement != null && resultStatement.isHashStatementValid()) {
             LOGGER.debug("Add Oracle Vote with valid Hash Statement to Voting. Oracle ID: " + oracleReader.getID());
             addVote(voting, resultStatement.getContent());
         } else {
-            LOGGER.debug("Oracle Vote Hash Statement not valid. Not adding to Voting. Oracle ID: " + oracleReader.getID());
+            if (resultStatement == null) {
+                LOGGER.debug("Result Statement is NULL");
+            } else {
+                LOGGER.debug("Oracle Vote Hash Statement not valid. Not adding to Voting. Oracle ID: " + oracleReader.getID());
+            }
+        }
+    }
+
+    private static void logResultStatement(ResultStatement resultStatement) {
+        if (resultStatement != null) {
+            LOGGER.debug("Result: " + resultStatement.getContent());
+            LOGGER.debug("Nonce: " + resultStatement.getNonce());
+            if (resultStatement.getHashStatement() != null) {
+                LOGGER.debug("Hash: " + resultStatement.getHashStatement().getContent());
+            }
         }
     }
 
