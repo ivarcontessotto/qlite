@@ -26,15 +26,12 @@ public class ResultHasher {
      * Creates hash for HashStatement.
      **/
     public static String hash(ResultStatement resultStatement) {
-        LOGGER.debug("Hashing Result");
         String nonced = resultStatement.getNonce()+resultStatement.getContent();
-        LOGGER.debug("nonce + result: " + nonced);
         byte[] noncedBytes = nonced.getBytes(StandardCharsets.US_ASCII);
         LOGGER.debug("nonced bytes: " + new String(noncedBytes));
         byte[] hash = digest.digest(noncedBytes);
         LOGGER.debug("hash bytes: " + new String(hash));
         String hexEncodedHash = new String(Hex.encode(hash));
-        LOGGER.debug("Hex encoded hash: " + hexEncodedHash);
         return hexEncodedHash;
     }
 }
