@@ -58,8 +58,12 @@ public class QubicReader {
      * @return ArrayList of oracle IAMStream identities, NULL if no assembly tx published
      */
     public List<String> getAssemblyList() {
-        if (assemblyList == null)
+        if (assemblyList == null) {
             assemblyList = fetchAssemblyList();
+        }
+        if (assemblyList == null) {
+            return new ArrayList<>();
+        }
         return assemblyList;
     }
 

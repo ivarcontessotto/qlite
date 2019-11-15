@@ -4,6 +4,8 @@ import constants.TangleJSONConstants;
 import exceptions.InvalidStatementException;
 import oracle.statements.Statement;
 import oracle.statements.hash.HashStatement;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import oracle.ResultHasher;
@@ -20,6 +22,7 @@ import tangle.TryteTool;
 public class ResultStatement extends Statement {
 
     private static final String CONTENT_TYPE = "result";
+    private final Logger logger;
 
     private String nonce;
     private final String result;
@@ -59,6 +62,7 @@ public class ResultStatement extends Statement {
         super(epochIndex);
         this.result = result;
         this.nonce = genNonce();
+        this.logger = LogManager.getLogger(ResultStatement.class);
     }
 
     private static String genNonce() {
@@ -84,7 +88,9 @@ public class ResultStatement extends Statement {
      * published in time) and contains the correct hash.
      * */
     public boolean isHashStatementValid() {
-        return hashEpoch != null && hashEpoch.getContent().equals(ResultHasher.hash(this));
+        String reHashedResult = ResultHasher.hash(this);
+        logger.debug("Comparing hash statement content to re-hashed result: " + hashEpoch.getContent() + " <-> " + reHashedResult);
+        return hashEpoch != null && hashEpoch.getContent().equals(reHashedResult);
     }
 
     @Override
@@ -96,5 +102,9 @@ public class ResultStatement extends Statement {
 
     public String getNonce() {
         return nonce;
+    }
+
+    public HashStatement getHashStatement() {
+        return hashEpoch;
     }
 }

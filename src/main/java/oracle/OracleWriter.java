@@ -102,7 +102,9 @@ public class OracleWriter {
         logger.debug("Calculate current Epoch Result and Hash");
         this.currentlyProcessedResult = new ResultStatement(epochIndex, calcResult(epochIndex));
         String hash = ResultHasher.hash(this.currentlyProcessedResult);
-        logger.debug("Result: " + this.currentlyProcessedResult.getContent() + " Hash: " + hash);
+        logger.debug("Result: " + this.currentlyProcessedResult.getContent() +
+                " Nonce: " + this.currentlyProcessedResult.getNonce() +
+                " Hash: " + hash);
 
         int[] ratings = assembly.getRatings();
         logger.debug("Write Hash Statement");
@@ -208,6 +210,9 @@ public class OracleWriter {
     }
 
     private String getOracleIdLogLines(List<String> oracleIds) {
+        if (oracleIds == null) {
+            return "";
+        }
         StringBuilder stringBuilder = new StringBuilder();
         oracleIds.forEach(id -> stringBuilder.append("\n").append(id));
         return stringBuilder.toString();

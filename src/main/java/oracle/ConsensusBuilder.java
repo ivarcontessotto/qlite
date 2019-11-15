@@ -3,6 +3,7 @@ package oracle;
 import constants.GeneralConstants;
 import iam.IAMIndex;
 import iam.IAMReader;
+import oracle.statements.hash.HashStatement;
 import oracle.statements.result.ResultStatement;
 import org.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
@@ -127,11 +128,18 @@ public class ConsensusBuilder {
     }
 
     private static void addOraclesVoteToVoting(OracleReader oracleReader, int epochIndex, Map<String, Double> voting) {
-        oracleReader.getHashStatementReader().read(epochIndex);
         ResultStatement resultStatement = oracleReader.getResultStatementReader().read(epochIndex);
+        LOGGER.debug("Fetched Oracles Vote:\nOracle: "  + oracleReader.getID() +
+                "\nResult: " + resultStatement.getContent() +
+                "\nNonce: " + resultStatement.getNonce() +
+                "\nHash: " + resultStatement.getHashStatement().getContent());
 
-        if(resultStatement != null && resultStatement.isHashStatementValid())
+        if(resultStatement.isHashStatementValid()) {
+            LOGGER.debug("Add Oracle Vote with valid Hash Statement to Voting. Oracle ID: " + oracleReader.getID());
             addVote(voting, resultStatement.getContent());
+        } else {
+            LOGGER.debug("Oracle Vote Hash Statement not valid. Not adding to Voting. Oracle ID: " + oracleReader.getID());
+        }
     }
 
     private static void addVote(Map<String, Double> quorumVoting, String votedFor) {
