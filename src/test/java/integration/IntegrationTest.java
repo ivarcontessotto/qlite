@@ -49,7 +49,8 @@ public class IntegrationTest {
         specification.setResultPeriodDuration(secondsResultPeriod);
         specification.setHashPeriodDuration(secondsHashPeriod);
         specification.setRuntimeLimit(secondsRuntimeLimit);
-        specification.setCode("kmh=GetArgs(0);if(kmh<=10){traffic='stau';}else{traffic='normal';}return(traffic);");
+        //specification.setCode("kmh=GetArgs(0);if(kmh<=10){traffic='stau';}else{traffic='normal';}return(traffic);");
+        specification.setCode("return(5 + mam_read())");
 
 
         LOGGER.info("Publish Qubic Transaction to Tangle Address: " + rootAddressForTest);
@@ -79,7 +80,7 @@ public class IntegrationTest {
                 continue;
             }
 
-            Path argsFilePath = Paths.get("./src/test/res/argsfile" + i + ".txt");
+            Path argsFilePath = Paths.get("argsfile" + i + ".txt");
             LOGGER.info("Create Args File: " + argsFilePath.toAbsolutePath().toString());
             createArgsFile(argsFilePath, Arrays.asList(50));
 
