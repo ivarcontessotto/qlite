@@ -16,9 +16,11 @@ import tangle.QubicPromotion;
 import tangle.TangleAPI;
 import tangle.TryteTool;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -32,6 +34,22 @@ public class IntegrationTest {
     @Ignore
     @Test
     public void testEpochResultsIT() throws InterruptedException {
+
+        ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("javascript");
+        try {
+            scriptEngine.eval(new FileReader("src/main/javascript/mam.js"));
+            //scriptEngine.eval(new FileReader("src/main/javascript/mamstream.js"));
+
+            String helloWorld = "helloWorld";
+            Invocable invocable = (Invocable) scriptEngine;
+            Object result;
+            result = invocable.invokeFunction("display", helloWorld);
+            System.out.println(result);
+            System.out.println("executed");
+        } catch (ScriptException | NoSuchMethodException | FileNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+
         LOGGER.info("Generat Root Address for Test");
         String rootAddressForTest = TangleAPI.getInstance().getNextUnspentAddressFromSeed(TryteTool.TEST_SEED);
         LOGGER.info(rootAddressForTest);

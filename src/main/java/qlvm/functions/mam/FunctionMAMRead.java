@@ -9,6 +9,11 @@ import qlvm.functions.Function;
 import iam.IAMReader;
 import tangle.TangleAPI;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.List;
 
 public class FunctionMAMRead extends Function {
@@ -22,6 +27,19 @@ public class FunctionMAMRead extends Function {
     public String call(QLVM qlvm, String[] par) {
         String address = this.lastAddress;
         int result = 0;
+
+        System.out.println("im here");
+        ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("javascript");
+        try {
+            try {
+                scriptEngine.eval(new FileReader("src/main/javascript/mam.js"));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            System.out.println("executed");
+        } catch (ScriptException e) {
+            System.out.println(e.getMessage());
+        }
 
         List<Transaction> transactions;
 
