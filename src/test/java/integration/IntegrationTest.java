@@ -20,6 +20,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.*;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -172,8 +174,38 @@ public class IntegrationTest {
             Object result = invocable.invokeFunction("fetchLastMessage", provider, root, mode, key);
             LOGGER.info(result);
         } catch (ScriptException | NoSuchMethodException | FileNotFoundException e) {
-            System.out.println(e.getMessage());
+            LOGGER.error("Error", e.getMessage());
         }
+    }
+
+    @Ignore
+    @Test
+    public void testMamFetchService() throws InterruptedException {
+        String localhost = "127.0.0.1";
+        int port = 2001;
+
+        try (Socket socket = new Socket(localhost, port);
+             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+            fetch(printWriter, bufferedReader);
+            Thread.sleep(1000);
+            fetch(printWriter, bufferedReader);
+            Thread.sleep(1000);
+            fetch(printWriter, bufferedReader);
+            Thread.sleep(1000);
+            fetch(printWriter, bufferedReader);
+            Thread.sleep(1000);
+
+        } catch (IOException e) {
+            LOGGER.error("Error", e);
+        }
+    }
+
+    void fetch(PrintWriter printWriter, BufferedReader bufferedReader) throws IOException {
+        printWriter.print("GET");
+        printWriter.flush();
+        LOGGER.info(bufferedReader.readLine());
     }
 }
 
