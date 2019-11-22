@@ -6,7 +6,6 @@ import org.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
 import qlvm.InterQubicResultFetcher;
-import qlvm.QLVM;
 import qubic.EditableQubicSpecification;
 import qubic.QubicReader;
 import qubic.QubicWriter;
@@ -15,8 +14,6 @@ import org.apache.logging.log4j.Logger;
 import tangle.QubicPromotion;
 import tangle.TangleAPI;
 import tangle.TryteTool;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Value;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
