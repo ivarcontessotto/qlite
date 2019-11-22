@@ -1,4 +1,5 @@
-const Mam = load('./node_modules/@iota/mam/lib/mam.clien.js');
+const Mam = require('@iota/mam');
+const Converter = require('@iota/converter')
 
 var fetchLastMessage = function(provider, root, mode, key) {
 	

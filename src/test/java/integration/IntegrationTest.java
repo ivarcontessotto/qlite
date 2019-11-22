@@ -164,7 +164,7 @@ public class IntegrationTest {
         ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("graal.js");
 
         try {
-            scriptEngine.eval(new FileReader("src/main/javascript/mamFetcher.js"));
+            scriptEngine.eval(new FileReader("src/main/javascript/service.js"));
 
             String provider = "https://nodes.devnet.iota.org:443";
             String root = "QZIFJWSFOXPMWNDUXSFSOOAZFANHCNSOFWEVLYKMLUA9ZVSRLCQ99QYJ9PTUMTWPDTLALGIBHUNTZUAYN";
