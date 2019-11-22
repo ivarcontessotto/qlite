@@ -7,19 +7,29 @@ const mode = 'public';
 const key = null;
 
 try {
-      Mam.init(provider);
-	  
-      const convertAndCollect = result => { 
-	    let jsonArray = JSON.parse(IotaConverter.trytesToAscii(result));
-		for (var i = 0; i < jsonArray.length; i++) {
-			console.log('pritning array')
-			console.log(jsonArray[i]);
+	
+	Mam.init(provider);
+	
+	let response = Mam.fetch(root, mode, key);
+	
+	response.then(resolve => {
+		
+		console.log('Next Root: ' + resolve.nextRoot);
+		console.log('')
+		
+		for (var i = 0; i < resolve.messages.length; i++) {
+			console.log('Message ' + i)
+			console.log('')
+			
+			let jsonArray = JSON.parse(IotaConverter.trytesToAscii(resolve.messages[i]));
+			jsonArray.forEach(json => {
+				console.log(json)
+				console.log('')
+			})
 		}
-	  }
-	  
-      let response = Mam.fetch(root, mode, key, convertAndCollect);
-	 
+	})
+	
 
 } catch (error) {
-      console.log('MAM fetch error', error);
+	console.log('MAM fetch error', error);
 }
