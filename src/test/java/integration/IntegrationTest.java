@@ -15,6 +15,8 @@ import org.apache.logging.log4j.Logger;
 import tangle.QubicPromotion;
 import tangle.TangleAPI;
 import tangle.TryteTool;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Value;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -34,21 +36,6 @@ public class IntegrationTest {
     @Ignore
     @Test
     public void testEpochResultsIT() throws InterruptedException {
-
-        ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("javascript");
-        try {
-            scriptEngine.eval(new FileReader("src/main/javascript/mam.js"));
-            //scriptEngine.eval(new FileReader("src/main/javascript/mamstream.js"));
-
-            String helloWorld = "helloWorld";
-            Invocable invocable = (Invocable) scriptEngine;
-            Object result;
-            result = invocable.invokeFunction("display", helloWorld);
-            System.out.println(result);
-            System.out.println("executed");
-        } catch (ScriptException | NoSuchMethodException | FileNotFoundException e) {
-            System.out.println(e.getMessage());
-        }
 
         LOGGER.info("Generat Root Address for Test");
         String rootAddressForTest = TangleAPI.getInstance().getNextUnspentAddressFromSeed(TryteTool.TEST_SEED);
@@ -168,6 +155,27 @@ public class IntegrationTest {
         } catch (IOException e) {
             LOGGER.error("Could not create new argsfile", e);
 
+        }
+    }
+
+    @Ignore
+    @Test
+    public void testMamRead() {
+        ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("graal.js");
+
+        try {
+            scriptEngine.eval(new FileReader("src/main/javascript/mamFetcher.js"));
+
+            String provider = "https://nodes.devnet.iota.org:443";
+            String root = "QZIFJWSFOXPMWNDUXSFSOOAZFANHCNSOFWEVLYKMLUA9ZVSRLCQ99QYJ9PTUMTWPDTLALGIBHUNTZUAYN";
+            String mode = "public";
+            String key = null;
+
+            Invocable invocable = (Invocable) scriptEngine;
+            Object result = invocable.invokeFunction("fetchLastMessage", provider, root, mode, key);
+            LOGGER.info(result);
+        } catch (ScriptException | NoSuchMethodException | FileNotFoundException e) {
+            System.out.println(e.getMessage());
         }
     }
 }
