@@ -1,6 +1,9 @@
 package integration;
 
+import com.jayway.jsonpath.JsonPath;
 import constants.TangleJSONConstants;
+import meteo_data.Geo_Admin_Humidity;
+import meteo_data.Geo_Admin_Temperature;
 import oracle.*;
 import org.json.JSONObject;
 import org.junit.Ignore;
@@ -17,6 +20,7 @@ import tangle.TryteTool;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -31,6 +35,9 @@ public class IntegrationTest {
     @Ignore
     @Test
     public void testEpochResultsIT() throws InterruptedException {
+
+        String humidity = Geo_Admin_Humidity.GetData();
+        String temperature = Geo_Admin_Temperature.GetData();
 
         LOGGER.info("Generat Root Address for Test");
         String rootAddressForTest = TangleAPI.getInstance().getNextUnspentAddressFromSeed(TryteTool.TEST_SEED);
