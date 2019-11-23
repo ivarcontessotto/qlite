@@ -15,50 +15,57 @@ const mode = 'public';
 const key = null;
 const localhost = '127.0.0.1';
 
+let latestMessage = null;	
 
-function initializeMam() {    
-	try {
-		Mam.init(provider);	
-	} catch (error) {
-		console.log('MAM initialize error', error);
-	}
-};	
+function convertToJsonString(message) {
+	return JSON.stringify(JSON.parse(Converter.trytesToAscii(message)));
+}
 
-function fetchLastMessage() {
-	try {
-		const response = Mam.fetch(root, mode, key);
-			response.then(resolve => {
-			return resolve.nextRoot;
-		});
-	} catch (error) {
-		console.log('Mam fetch error', error);
-		return null;
-	}
+function fetchLatestMessage() {
+	const response = Mam.fetch(root, mode, key);
+	response.then(resolve => {
+		latestMessage = convertToJsonString(resolve.messages[resolve.messages.length - 1]);
+		console.log(latestMessage);
+	});
 }
 
 function sleep(milliseconds) {
    return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
-async function publishData(client) {
-	console.log('A new connection has been established');
+async function publishLatestMessage(client) {
+	console.log('Client connection established');
+	let stop = false;
 	
 	client.on('end', function() {
-		console.log('Closing connection with the client');
+		console.log('Client connection closed');
+		stop = true;
 	});
 
 	client.on('error', function(error) {
-		console.log(`Error: ${error}`);
+		console.log(`Client connection error: ${error}`);
+		stop = true;
 	})
 	
-	for (var i = 0; i < 10; i++) {
-		client.write(`Hello ${i}\r\n`);
+	while (!stop) {
+		client.write(`${latestMessage}\r\n`);
 		await sleep(1000);
 	}
 }
 
-const server = net.createServer(publishData);
+try {
+	console.log('init mam');
+	Mam.init(provider);
+	console.log('fetch latest message');
+	fetchLatestMessage();
+	console.log(latestMessage);
+	// TOdo then subscribe to mam updates
 
-server.listen(listeningPort, localhost, () => { 
-	console.log(`Server listening for connection on port ${listeningPort}`);
-});
+	const server = net.createServer(publishLatestMessage);
+	server.listen(listeningPort, localhost, () => { 
+		console.log(`Server listening for connection on port ${listeningPort}`);
+	});
+
+} catch (error) {
+	console.log(`Unhanldled error: ${error}`);
+}
