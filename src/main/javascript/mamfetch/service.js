@@ -25,7 +25,6 @@ function fetchLatestMessage() {
 	const response = Mam.fetch(root, mode, key);
 	response.then(resolve => {
 		latestMessage = convertToJsonString(resolve.messages[resolve.messages.length - 1]);
-		console.log(latestMessage);
 	});
 }
 
@@ -48,7 +47,7 @@ async function publishLatestMessage(client) {
 	})
 	
 	while (!stop) {
-		client.write(`${latestMessage}\r\n`);
+		client.write(`${latestMessage}\r\n`); // Todo do this in mam callback
 		await sleep(1000);
 	}
 }
@@ -58,8 +57,8 @@ try {
 	Mam.init(provider);
 	console.log('fetch latest message');
 	fetchLatestMessage();
-	console.log(latestMessage);
-	// TOdo then subscribe to mam updates
+	// Todo subscribe to mam updates and save them to latest message variable.
+	// Todo send latest message to client when changed
 
 	const server = net.createServer(publishLatestMessage);
 	server.listen(listeningPort, localhost, () => { 
