@@ -185,27 +185,15 @@ public class IntegrationTest {
         int port = 2001;
 
         try (Socket socket = new Socket(localhost, port);
-             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            fetch(printWriter, bufferedReader);
-            Thread.sleep(1000);
-            fetch(printWriter, bufferedReader);
-            Thread.sleep(1000);
-            fetch(printWriter, bufferedReader);
-            Thread.sleep(1000);
-            fetch(printWriter, bufferedReader);
-            Thread.sleep(1000);
+            for (int i = 0; i < 10; i++) {
+                LOGGER.info(bufferedReader.readLine());
+            }
 
         } catch (IOException e) {
             LOGGER.error("Error", e);
         }
-    }
-
-    void fetch(PrintWriter printWriter, BufferedReader bufferedReader) throws IOException {
-        printWriter.print("GET");
-        printWriter.flush();
-        LOGGER.info(bufferedReader.readLine());
     }
 }
 

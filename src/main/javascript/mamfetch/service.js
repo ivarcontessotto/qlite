@@ -8,10 +8,15 @@ const listeningPort = process.argv[2];
 if (!process.argv[3]) return console.log('Missing Argument: An URL for a public iota node provider is required to start the service!');
 const provider = process.argv[3];
 
+if (!process.argv[4]) return console.log('Missing Argument: The root address of the MAM stream to listen to is required!');
+const root = process.argv[4];
+
+const mode = 'public';
+const key = null;
 const localhost = '127.0.0.1';
 
 
-const initializeMam = function() {    
+function initializeMam() {    
 	try {
 		Mam.init(provider);	
 	} catch (error) {
@@ -19,7 +24,7 @@ const initializeMam = function() {
 	}
 };	
 
-const fetchLastMessage = function(root, mode, key) {
+function fetchLastMessage() {
 	try {
 		const response = Mam.fetch(root, mode, key);
 			response.then(resolve => {
@@ -31,20 +36,29 @@ const fetchLastMessage = function(root, mode, key) {
 	}
 }
 
-const echo = function(socket) {
-	console.log('echo');
-	socket.write('Echo server\r\n');
+function sleep(milliseconds) {
+   return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
-const initializeServer = function() {
-	try {
-		return net.createServer(echo);
-	} catch (error) {
-		console.log('Servicer initialize error', error);
-		return null;
+async function publishData(client) {
+	console.log('A new connection has been established');
+	
+	client.on('end', function() {
+		console.log('Closing connection with the client');
+	});
+
+	client.on('error', function(error) {
+		console.log(`Error: ${error}`);
+	})
+	
+	for (var i = 0; i < 10; i++) {
+		client.write(`Hello ${i}\r\n`);
+		await sleep(1000);
 	}
 }
 
-const server = initializeServer();
-server.listen(listeningPort, localhost);
-console.log('done');
+const server = net.createServer(publishData);
+
+server.listen(listeningPort, localhost, () => { 
+	console.log(`Server listening for connection on port ${listeningPort}`);
+});
