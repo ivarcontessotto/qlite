@@ -9,21 +9,23 @@ if (!process.argv[3]) return console.log('Missing Argument: An URL for a public 
 const provider = process.argv[3];
 
 if (!process.argv[4]) return console.log('Missing Argument: The root address of the MAM stream to listen to is required!');
-let nextRoot = process.argv[4];
+let nextRoot =  process.argv[4];
 
 const mode = 'public';
 const key = null;
 const localhost = '127.0.0.1';
 
 const pollingIntervallMilliseconds = 5 * 1000;
-let latestMessage = null;	
+let lastSentMessage = null;
+let latestMessage = null;
+	
 
 function sleep(milliseconds) {
    return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
-function convertToJson(message) {
-	return JSON.parse(Converter.trytesToAscii(message));
+function convertToJsonString(message) {
+	return JSON.stringify(JSON.parse(Converter.trytesToAscii(message)));
 }
 
 function fetchLatestMessage(root) {
@@ -32,25 +34,42 @@ function fetchLatestMessage(root) {
 	
 	response.then(resolve => {
 		console.log('Resolve response');
+		
+		console.log(`nextRoot: ${resolve.nextRoot}`);	
 		nextRoot = resolve.nextRoot;
-		latestMessage = convertToJson(resolve.messages[resolve.messages.length - 1]);
+		
+		if (resolve.messages.length != 0) {
+			console.log('Resolving messages');
+			latestMessage = convertToJsonString(resolve.messages[resolve.messages.length - 1]);
+			console.log(`New latest message: ${latestMessage}`);			
+		}
+		else {
+			console.log('No new messages yet.');
+		}
 	}).catch(error => { 
-		console.log(`Fetch error: ${error}`);
-		latestMessage = null;
+		console.log(`Resolve error: ${error}`);
 	});
 }
 
-async function waitForLatestMessageToInitialize() {
+async function initializeLatestMessage() {
+	lastSentMessage = null; // Reset this in case of a reconnect to receive the last sent message again.
+	
+	if (latestMessage) {
+		console.log(`Latest message already known: ${latestMessage}`);
+		return;
+	}
+	
+	fetchLatestMessage(nextRoot);
 	console.log('Wait for latest message to be initialized');
 	while (!latestMessage) await sleep(500);
 	console.log(`Latest message initalized: ${latestMessage}`);
 }
 
 function publishLatestMessage(client) {
-	if (latestMessage) {
-		message = JSON.stringify(latestMessage);
-		console.log(`Publish latest message ${message}`);
-		client.write(`${message}\r\n`); 
+	if (latestMessage && latestMessage != lastSentMessage) {
+		console.log(`Publish latest message ${latestMessage}`);
+		client.write(`${latestMessage}\r\n`);
+		lastSentMessage = latestMessage;
 	}
 }
 
@@ -69,8 +88,7 @@ async function onClientConnection(client) {
 		stop = true;
 	})
 	
-	fetchLatestMessage(nextRoot);
-	await waitForLatestMessageToInitialize();
+	await initializeLatestMessage();
 		
 	console.log('Start publishing');
 	while (!stop) {
