@@ -15,7 +15,7 @@ const mode = 'public';
 const key = null;
 const localhost = '127.0.0.1';
 
-const pollingIntervallMilliseconds = 5 * 1000;
+const pollingIntervallMilliseconds = 15 * 1000;
 let lastSentMessage = null;
 let latestMessage = null;
 	

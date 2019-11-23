@@ -15,18 +15,14 @@ import tangle.QubicPromotion;
 import tangle.TangleAPI;
 import tangle.TryteTool;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.io.*;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class IntegrationTest {
 
@@ -159,40 +155,47 @@ public class IntegrationTest {
 
     @Ignore
     @Test
-    public void testMamRead() {
-        ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("graal.js");
+    public void testMamFetchService() throws InterruptedException {
+        String localhost = "127.0.0.1";
+        Integer port = 2001;
+        String provider = "https://nodes.devnet.iota.org:443";
+        String mamRoot = "FJ9RBUSLIDBZGL9LYKESCPHWSKGWVHUWZOXZKVD9FZNASXOCUMDWZLLNZ9X9FNFMRNCEKRPOQFFXKTX9A";
 
         try {
-            scriptEngine.eval(new FileReader("src/main/javascript/service.js"));
+            LOGGER.info("Start service process.");
+            ProcessBuilder pb = new ProcessBuilder("node", "service.js", port.toString(), provider, mamRoot);
+            pb.directory(new File("./src/main/javascript/mamfetch/"));
+            Process service = pb.start();
 
-            String provider = "https://nodes.devnet.iota.org:443";
-            String root = "QZIFJWSFOXPMWNDUXSFSOOAZFANHCNSOFWEVLYKMLUA9ZVSRLCQ99QYJ9PTUMTWPDTLALGIBHUNTZUAYN";
-            String mode = "public";
-            String key = null;
+            LOGGER.info("Start listening for messages.");
+            this.readFromService(localhost, port, 10);
 
-            Invocable invocable = (Invocable) scriptEngine;
-            Object result = invocable.invokeFunction("fetchLastMessage", provider, root, mode, key);
-            LOGGER.info(result);
-        } catch (ScriptException | NoSuchMethodException | FileNotFoundException e) {
-            LOGGER.error("Error", e.getMessage());
+            LOGGER.info("Killing service process.");
+            this.killProcess(service);
+
+        } catch (IOException e) {
+            LOGGER.error("Error", e);
         }
     }
 
-    @Ignore
-    @Test
-    public void testMamFetchService() throws InterruptedException {
-        String localhost = "127.0.0.1";
-        int port = 2001;
-
-        try (Socket socket = new Socket(localhost, port);
+    private void readFromService(String host, int port, int times) {
+        try (Socket socket = new Socket(host, port);
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < times; i++) {
                 LOGGER.info(bufferedReader.readLine());
             }
 
         } catch (IOException e) {
             LOGGER.error("Error", e);
+        }
+    }
+
+    private void killProcess(Process process) throws InterruptedException {
+        process.destroy();
+        process.waitFor(10, TimeUnit.SECONDS);
+        if (process.isAlive()) {
+            process.destroyForcibly();
         }
     }
 }
