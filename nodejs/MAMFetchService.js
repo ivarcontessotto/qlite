@@ -5,17 +5,19 @@ const Converter = require('@iota/converter');
 if (!process.argv[2]) return console.log('Missing Argument: A listening port for the service is requried!');
 const listeningPort = process.argv[2];
 
-if (!process.argv[3]) return console.log('Missing Argument: An URL for a public iota node provider is required to start the service!');
-const provider = process.argv[3];
+if (!process.argv[3]) return console.log('Missing Argument: A polling interval in seconds for fetching from the MAM Stream is requried!');
+const pollingIntervalMilliseconds = process.argv[3] * 1000;
 
-if (!process.argv[4]) return console.log('Missing Argument: The root address of the MAM stream to listen to is required!');
-let nextRoot =  process.argv[4];
+if (!process.argv[4]) return console.log('Missing Argument: An URL for a public iota node provider is required to start the service!');
+const provider = process.argv[4];
+
+if (!process.argv[5]) return console.log('Missing Argument: The root address of the MAM stream to listen to is required!');
+let nextRoot =  process.argv[5];
 
 const mode = 'public';
 const key = null;
 const localhost = '127.0.0.1';
 
-const pollingIntervallMilliseconds = 15 * 1000;
 let lastSentMessage = null;
 let latestMessage = null;
 	
@@ -94,7 +96,7 @@ async function onClientConnection(client) {
 	while (!stop) {
 		publishLatestMessage(client);
 		fetchLatestMessage(nextRoot);
-		await sleep(pollingIntervallMilliseconds);
+		await sleep(pollingIntervalMilliseconds);
 	}
 }
 

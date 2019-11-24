@@ -1,6 +1,7 @@
 package qlvm;
 
 import constants.GeneralConstants;
+import oracle.input.provider.OracleInputProvider;
 import org.json.JSONArray;
 import oracle.OracleWriter;
 import org.json.JSONObject;
@@ -8,7 +9,6 @@ import qlvm.exceptions.runtime.*;
 import qlvm.functions.operations.LogicOperations;
 import qlvm.functions.operations.MathOperations;
 
-import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -54,7 +54,7 @@ public class QLVM {
     private final ArrayList<String> stringTable = new ArrayList<>();
     private final HashMap<String, String> variables = new HashMap<>();
     private final OracleWriter oracleWriter;
-    private final Path arsFilePath;
+    private final OracleInputProvider oracleInputProvider;
 
     private boolean interrupted = false;
     private final boolean inTestMode;
@@ -63,12 +63,12 @@ public class QLVM {
      * Runs code in the context of a specific OracleWriter.
      * @param code the code to run
      * @param oracleWriter the oracleWriter to use as context
-     * @param argsFilePath the args file path
+     * @param oracleInputProvider the oracle input provider.
      * */
-    public static String run(String code, OracleWriter oracleWriter, int epochIndex, Path argsFilePath) {
+    public static String run(String code, OracleWriter oracleWriter, int epochIndex, OracleInputProvider oracleInputProvider) {
 
         final ObjectContainer oc = new ObjectContainer(null);
-        final QLVM qlvm = new QLVM(oracleWriter, epochIndex, argsFilePath);
+        final QLVM qlvm = new QLVM(oracleWriter, epochIndex, oracleInputProvider);
 
         Thread t = new Thread() {
             @Override
@@ -114,8 +114,8 @@ public class QLVM {
         return qlvm.executeProgram(code);
     }
 
-    private QLVM(OracleWriter oracleWriter, int epochIndex, Path argsFilePath) {
-        this.arsFilePath = argsFilePath;
+    private QLVM(OracleWriter oracleWriter, int epochIndex, OracleInputProvider oracleInputProvider) {
+        this.oracleInputProvider = oracleInputProvider;
         this.oracleWriter = oracleWriter;
         variables.put("epoch", ""+epochIndex);
         variables.put("qubic", "'"+oracleWriter.getQubicReader().getID()+"'");
@@ -125,16 +125,16 @@ public class QLVM {
     /**
      * Just for local testing purposes.
      * */
-    private QLVM(int epoch, Path argsFilePath) {
-        this.arsFilePath = argsFilePath;
+    private QLVM(int epoch, OracleInputProvider oracleInputProvider) {
+        this.oracleInputProvider = oracleInputProvider;
         this.oracleWriter = null;
         variables.put("epoch", ""+epoch);
         variables.put("qubic", null);
         inTestMode = true;
     }
 
-    public Path getArgsFilePath() {
-        return this.arsFilePath;
+    public OracleInputProvider getOracleInputProvider() {
+        return this.oracleInputProvider;
     }
 
     private void interrupt() {

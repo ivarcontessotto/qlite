@@ -1,12 +1,10 @@
 package qlvm.functions.mam;
 
-import iam.IAMIndex;
 import org.iota.jota.model.Transaction;
 import org.iota.jota.utils.TrytesConverter;
 import org.json.JSONObject;
 import qlvm.QLVM;
 import qlvm.functions.Function;
-import iam.IAMReader;
 import tangle.TangleAPI;
 
 import javax.script.ScriptEngine;
@@ -29,7 +27,7 @@ public class FunctionMAMRead extends Function {
         int result = 0;
 
         System.out.println("im here");
-        ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("javascript");
+        ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("src/main/javascript");
         try {
             try {
                 scriptEngine.eval(new FileReader("src/main/javascript/mam.js"));
