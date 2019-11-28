@@ -99,8 +99,8 @@ public class OracleInputProviderTest {
                 3001,
                 15,
                 "https://nodes.devnet.iota.org:443",
-                //rootWithArrayMessages,
-                rootWithSingleMessages,
+                rootWithArrayMessages,
+                //rootWithSingleMessages,
                 valueQueries
         );
 

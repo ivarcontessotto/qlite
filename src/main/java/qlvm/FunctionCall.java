@@ -9,7 +9,6 @@ import qlvm.functions.data.FunctionType;
 import qlvm.functions.input.FunctionGetInput;
 import qlvm.functions.iam.FunctionIAMRead;
 import qlvm.functions.iota.*;
-import qlvm.functions.mam.FunctionMAMRead;
 import qlvm.functions.qubic.FunctionQubicConsensus;
 import qlvm.functions.qubic.FunctionQubicFetch;
 import qlvm.functions.string.FunctionHash;
@@ -33,7 +32,6 @@ public final class FunctionCall {
         new FunctionSubstr(),
         new FunctionHash(),
         new FunctionGetInput(),
-        new FunctionMAMRead(),
     };
 
     private FunctionCall() {}
