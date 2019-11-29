@@ -18,8 +18,7 @@ const mode = 'public';
 const key = null;
 const localhost = '127.0.0.1';
 
-let lastSentMessage = null;
-let newMessage = null;
+let lastPublishedMessage = null;
 	
 
 function sleep(milliseconds) {
@@ -30,7 +29,20 @@ function convertToJsonString(message) {
 	return JSON.stringify(JSON.parse(Converter.trytesToAscii(message)));
 }
 
-function fetchNewMessage(root) {
+function publishMessage(client, message) {
+	if (message) {
+		console.log(`Publish message ${message}`);
+		client.write(`${message}\r\n`);
+		lastPublishedMessage = message;
+	}
+}
+
+function publishLastPublishedMessageAgain(client) {
+    console.log('Publish last sent message again');
+    publishMessage(client, lastPublishedMessage);
+}
+
+function fetchNewMessageAndPublish(root, client) {
 	console.log(`Fetch latest message from root ${root}`);
 	const response = Mam.fetch(root, mode, key);
 	
@@ -43,32 +55,15 @@ function fetchNewMessage(root) {
 		if (resolve.messages.length != 0) {
 			console.log('Resolving messages');
 			newMessage = convertToJsonString(resolve.messages[resolve.messages.length - 1]);
-			console.log(`New message: ${newMessage}`);
+			console.log(`New message found: ${newMessage}`);
+			publishMessage(client, newMessage);
 		}
 		else {
-		    newMessage = null;
 			console.log('No new message yet.');
 		}
-	}).catch(error => { 
-		newMessage = null;
+	}).catch(error => {
 		console.log(`Resolve error: ${error}`);
 	});
-}
-
-function publishNewMessage(client) {
-	if (newMessage) {
-	    temp = newMessage // Cache it because newMessage  can be written by async operation.
-		console.log(`Publish message ${temp}`);
-		client.write(`${temp}\r\n`);
-		newMessage = null;
-		lastSentMessage = temp;
-	}
-}
-
-function publishLastSentMessageAgain(client) {
-    console.log('Publish last sent message again');
-    newMessage = lastSentMessage;
-    publishNewMessage(client);
 }
 
 async function onClientConnection(client) {
@@ -86,12 +81,11 @@ async function onClientConnection(client) {
 		stop = true;
 	})
 	
-	publishLastSentMessageAgain(client);
+	publishLastPublishedMessageAgain(client);
 		
 	console.log('Start publishing');
 	while (!stop) {
-		publishNewMessage(client);
-		fetchNewMessage(nextRoot);
+		fetchNewMessageAndPublish(nextRoot, client);
 		await sleep(pollingIntervalMilliseconds);
 	}
 }
