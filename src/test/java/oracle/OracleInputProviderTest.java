@@ -6,18 +6,13 @@ import oracle.input.config.LogfileInputConfig;
 import oracle.input.config.MamStreamInputConfig;
 import oracle.input.config.ValueType;
 import oracle.input.config.WebServiceInputConfig;
-import oracle.input.provider.LogfileInputProvider;
-import oracle.input.provider.MamStreamInputProvider;
-import oracle.input.provider.OracleInputProvider;
-import oracle.input.provider.WebServiceInputProvider;
+import oracle.input.provider.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -96,17 +91,18 @@ public class OracleInputProviderTest {
 
         MamStreamInputConfig config = new MamStreamInputConfig(
                 ValueType.DOUBLE,
-                3001,
+                3000,
                 15,
                 "https://nodes.devnet.iota.org:443",
-                rootWithArrayMessages,
+                // rootWithArrayMessages,
                 //rootWithSingleMessages,
+                "FQARSL9RXPOLYGDSTGZWMKBVOEVNLXIGLWUZECKAJTMB9SGRJBFHJZNJJNBWBVPSMDGDRNMXBXYOTYGB9",
                 valueQueries
         );
 
         OracleInputProvider inputProvider = new MamStreamInputProvider(config);
 
-        for (int i = 0; i < 120; i++) {
+        for (int i = 0; i < 100000; i++) {
             LOGGER.info("Last Input: " + inputProvider.getInput());
             Thread.sleep(1000);
         }
