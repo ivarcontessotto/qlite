@@ -96,7 +96,7 @@ public class OracleInputProviderTest {
                 "https://nodes.devnet.iota.org:443",
                 // rootWithArrayMessages,
                 //rootWithSingleMessages,
-                "FQARSL9RXPOLYGDSTGZWMKBVOEVNLXIGLWUZECKAJTMB9SGRJBFHJZNJJNBWBVPSMDGDRNMXBXYOTYGB9",
+                "ZQSIPZYOINPROESTRZXHPOVQSAXBCIQRDMWFDNHGDSXAWFOAUNFJBDCKYOLRQWEHHYSGXRDEUMCRFCHLX",
                 valueQueries
         );
 

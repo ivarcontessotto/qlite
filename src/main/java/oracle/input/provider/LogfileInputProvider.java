@@ -54,7 +54,6 @@ public class LogfileInputProvider implements OracleInputProvider, Runnable{
                 this.skipToLastLine(in);
                 if (this.lastLine != null) {
                     this.findInputInLastLine();
-                    logger.info("New latest input: " + this.latestInput);
                 }
                 Thread.sleep(1000);
             }
@@ -73,8 +72,7 @@ public class LogfileInputProvider implements OracleInputProvider, Runnable{
         Matcher matcher = this.config.getValueRegex().matcher(this.lastLine);
         if (matcher.find()) {
             this.latestInput = matcher.group(1);
-        } else {
-            this.latestInput = null;
+            logger.info("New latest input: " + this.latestInput);
         }
     }
 }

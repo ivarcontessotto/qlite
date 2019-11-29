@@ -54,8 +54,7 @@ public class WebServiceInputProvider implements OracleInputProvider, Runnable {
             while(true) {
                 String response = this.readFromService();
                 if (response != null) {
-                    this.latestInput = JSONPathHelper.find(response, new LinkedList<>(config.getValueQueries()));
-                    logger.info("New latest input: " + this.latestInput);
+                    this.findInputInResponse(response);
                 }
                 Thread.sleep(waitTimeMilliseconds);
             }
@@ -82,6 +81,14 @@ public class WebServiceInputProvider implements OracleInputProvider, Runnable {
         } catch (Exception e) {
             this.logger.error("Error while reading from webservice.", e);
             return null;
+        }
+    }
+
+    private void findInputInResponse(String response) {
+        String found = JSONPathHelper.find(response, new LinkedList<>(config.getValueQueries()));
+        if (found != null) {
+            this.latestInput = found;
+            logger.info("New latest input: " + this.latestInput);
         }
     }
 }

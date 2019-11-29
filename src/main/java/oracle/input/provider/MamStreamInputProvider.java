@@ -86,12 +86,18 @@ public class MamStreamInputProvider implements OracleInputProvider, Runnable {
         try (Socket socket = new Socket(LOCALHOST, this.config.getServicePort());
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            in.lines().forEach(message -> {
-                this.latestInput = JSONPathHelper.find(message, new LinkedList<>(this.config.getValueQueries()));
-            });
+            in.lines().forEach(this::findInputInMessage);
 
         } catch (IOException e) {
             this.logger.error("Error", e);
+        }
+    }
+
+    private void findInputInMessage(String message) {
+        String found = JSONPathHelper.find(message, new LinkedList<>(this.config.getValueQueries()));
+        if (found != null) {
+            this.latestInput = found;
+            logger.info("New latest input: " + this.latestInput);
         }
     }
 
