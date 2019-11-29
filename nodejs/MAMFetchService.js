@@ -19,7 +19,7 @@ const key = null;
 const localhost = '127.0.0.1';
 
 let lastSentMessage = null;
-let latestMessage = null;
+let newMessage = null;
 	
 
 function sleep(milliseconds) {
@@ -30,7 +30,7 @@ function convertToJsonString(message) {
 	return JSON.stringify(JSON.parse(Converter.trytesToAscii(message)));
 }
 
-function fetchLatestMessage(root) {
+function fetchNewMessage(root) {
 	console.log(`Fetch latest message from root ${root}`);
 	const response = Mam.fetch(root, mode, key);
 	
@@ -42,37 +42,33 @@ function fetchLatestMessage(root) {
 		
 		if (resolve.messages.length != 0) {
 			console.log('Resolving messages');
-			latestMessage = convertToJsonString(resolve.messages[resolve.messages.length - 1]);
-			console.log(`New latest message: ${latestMessage}`);			
+			newMessage = convertToJsonString(resolve.messages[resolve.messages.length - 1]);
+			console.log(`New message: ${newMessage}`);
 		}
 		else {
-			console.log('No new messages yet.');
+		    newMessage = null;
+			console.log('No new message yet.');
 		}
 	}).catch(error => { 
+		newMessage = null;
 		console.log(`Resolve error: ${error}`);
 	});
 }
 
-async function initializeLatestMessage() {
-	lastSentMessage = null; // Reset this in case of a reconnect to receive the last sent message again.
-	
-	if (latestMessage) {
-		console.log(`Latest message already known: ${latestMessage}`);
-		return;
+function publishNewMessage(client) {
+	if (newMessage) {
+	    temp = newMessage // Cache it because newMessage  can be written by async operation.
+		console.log(`Publish message ${temp}`);
+		client.write(`${temp}\r\n`);
+		newMessage = null;
+		lastSentMessage = temp;
 	}
-	
-	fetchLatestMessage(nextRoot);
-	console.log('Wait for latest message to be initialized');
-	while (!latestMessage) await sleep(500);
-	console.log(`Latest message initalized: ${latestMessage}`);
 }
 
-function publishLatestMessage(client) {
-	if (latestMessage && latestMessage != lastSentMessage) {
-		console.log(`Publish latest message ${latestMessage}`);
-		client.write(`${latestMessage}\r\n`);
-		lastSentMessage = latestMessage;
-	}
+function publishLastSentMessageAgain(client) {
+    console.log('Publish last sent message again');
+    newMessage = lastSentMessage;
+    publishNewMessage(client);
 }
 
 async function onClientConnection(client) {
@@ -90,12 +86,12 @@ async function onClientConnection(client) {
 		stop = true;
 	})
 	
-	await initializeLatestMessage();
+	publishLastSentMessageAgain(client);
 		
 	console.log('Start publishing');
 	while (!stop) {
-		publishLatestMessage(client);
-		fetchLatestMessage(nextRoot);
+		publishNewMessage(client);
+		fetchNewMessage(nextRoot);
 		await sleep(pollingIntervalMilliseconds);
 	}
 }
