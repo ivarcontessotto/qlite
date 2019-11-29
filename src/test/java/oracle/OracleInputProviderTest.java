@@ -86,17 +86,18 @@ public class OracleInputProviderTest {
         String rootWithSingleMessages = "FJ9RBUSLIDBZGL9LYKESCPHWSKGWVHUWZOXZKVD9FZNASXOCUMDWZLLNZ9X9FNFMRNCEKRPOQFFXKTX9A";
 
         Queue<JsonPath> valueQueries = new LinkedList<>();
+        valueQueries.add(JsonPath.compile("$[?(@.data.SensorType=='Temperature' && @.data.SensorName=='SCD30')].data.Value"));
         valueQueries.add(JsonPath.compile("$[-1]"));
-        valueQueries.add(JsonPath.compile("$.data.Value"));
+//        valueQueries.add(JsonPath.compile("$.data.Value"));
 
         MamStreamInputConfig config = new MamStreamInputConfig(
                 ValueType.DOUBLE,
                 3000,
                 15,
-                "https://nodes.devnet.iota.org:443",
+                "https://nodes.devnet.thetangle.org:443",
                 // rootWithArrayMessages,
                 //rootWithSingleMessages,
-                "ZQSIPZYOINPROESTRZXHPOVQSAXBCIQRDMWFDNHGDSXAWFOAUNFJBDCKYOLRQWEHHYSGXRDEUMCRFCHLX",
+                "KFMFJ9BIX9VDOTNYOOOWSLXPS9NMYCGTOXXKPLQOYWJNCICBKRZULBAFFFRAKSSCU99VDRKPBVFHYWGXF",
                 valueQueries
         );
 
