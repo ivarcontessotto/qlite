@@ -25,14 +25,6 @@
             <id>microhash</id>
             <name>MicroHash</name>
         </developer>
-        <developer>
-            <id>iacontes</id>
-            <name>Ivar Contessotto</name>
-        </developer>
-        <developer>
-            <id>iabrand</id>
-            <name>Fabian Brand</name>
-        </developer>
     </developers>
 
     <repositories>
