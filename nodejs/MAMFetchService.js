@@ -11,15 +11,21 @@ const pollingIntervalMilliseconds = process.argv[3] * 1000;
 if (!process.argv[4]) return console.log('Missing Argument: An URL for a public iota node provider is required to start the service!');
 const provider = process.argv[4];
 
-if (!process.argv[5]) return console.log('Missing Argument: The root address of the MAM stream to listen to is required!');
-let nextRoot =  process.argv[5];
+if (!process.argv[5]) return console.log('Missing Argument: The mode is required! (public, private, restricted)');
+let mode =  process.argv[5];
 
-const mode = 'restricted';
-const key = 'RAREYODAPEPE';
+if (!process.argv[6]) return console.log('Missing Argument: The root address of the MAM stream to listen to is required!');
+let nextRoot =  process.argv[6];
+
+let encryptionKey = null;
+if (mode == 'restricted') {
+    if (!process.argv[7]) return console.log('Missing Argument: For restricted mode an encryption key is required!');
+    encryptionKey = process.argv[7];
+}
+
 const localhost = '127.0.0.1';
 
 let lastPublishedMessage = null;
-	
 
 function sleep(milliseconds) {
    return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -44,7 +50,7 @@ function publishLastPublishedMessageAgain(client) {
 
 function fetchNewMessageAndPublish(root, client) {
 	console.log(`Fetch latest message from root ${root}`);
-	const response = Mam.fetch(root, mode, key);
+	const response = Mam.fetch(root, mode, encryptionKey);
 	
 	response.then(resolve => {
 		console.log('Resolve response');

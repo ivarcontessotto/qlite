@@ -2,10 +2,7 @@ package oracle;
 
 import com.jayway.jsonpath.JsonPath;
 import integration.IntegrationTest;
-import oracle.input.config.LogfileInputConfig;
-import oracle.input.config.MamStreamInputConfig;
-import oracle.input.config.ValueType;
-import oracle.input.config.WebServiceInputConfig;
+import oracle.input.config.*;
 import oracle.input.provider.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -82,22 +79,18 @@ public class OracleInputProviderTest {
     @Test
     public void testGetOracleInputFromMamStream() throws InterruptedException {
 
-        String rootWithArrayMessages = "MY9FIMUONFTFBOTXNVOHNTEEVNQQNSCQQNETOUKBTRAKXKCHTRIVUCIISGTTBACBRACHPK9BEASCAXFUX";
-        String rootWithSingleMessages = "FJ9RBUSLIDBZGL9LYKESCPHWSKGWVHUWZOXZKVD9FZNASXOCUMDWZLLNZ9X9FNFMRNCEKRPOQFFXKTX9A";
-
         Queue<JsonPath> valueQueries = new LinkedList<>();
         valueQueries.add(JsonPath.compile("$[?(@.data.Measurement=='Temperature')].data.Value"));
         valueQueries.add(JsonPath.compile("$[-1]"));
-//        valueQueries.add(JsonPath.compile("$.data.Value"));
 
         MamStreamInputConfig config = new MamStreamInputConfig(
                 ValueType.DOUBLE,
                 3000,
-                30,
+                60,
                 "https://nodes.devnet.thetangle.org:443",
-                // rootWithArrayMessages,
-                //rootWithSingleMessages,
-                "DZBA9VLJCFSDTYPLWBKMVYFVEJJJDBQVKPUKHQXBAZ9CCKZ9VCYWSOYUIBZQOTHE9RCKDBVNZEAWHMZZA",
+                MAMMode.RESTRICTED,
+                "KMTJV9ZFBAURYLFLMUHJNTNO9EBYERXJUNNSMDWMBIUFUETDCSCQZLKBJWKTFNJLSNXJUCKCLUKHWKFYJ",
+                "RAREYODAPEPE",
                 valueQueries
         );
 

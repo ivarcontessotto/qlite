@@ -66,7 +66,9 @@ public class MamStreamInputProvider implements OracleInputProvider, Runnable {
                     String.valueOf(this.config.getServicePort()),
                     String.valueOf(this.config.getServicePollingInterval()),
                     config.getNodeProviderUrl(),
-                    config.getRootAddress());
+                    config.getMode().name().toLowerCase(),
+                    config.getRootAddress(),
+                    config.getEncryptionKey());
 
             Process serviceProcess = processBuilder.start();
 
