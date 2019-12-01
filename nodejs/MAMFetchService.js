@@ -14,8 +14,8 @@ const provider = process.argv[4];
 if (!process.argv[5]) return console.log('Missing Argument: The root address of the MAM stream to listen to is required!');
 let nextRoot =  process.argv[5];
 
-const mode = 'public';
-const key = null;
+const mode = 'restricted';
+const key = 'RAREYODAPEPE';
 const localhost = '127.0.0.1';
 
 let lastPublishedMessage = null;
@@ -61,7 +61,9 @@ function fetchNewMessageAndPublish(root, client) {
 		else {
 			console.log('No new message yet.');
 		}
-	}).catch(error => {
+	});
+
+	response.catch(error => {
 		console.log(`Resolve error: ${error}`);
 	});
 }
