@@ -3,7 +3,7 @@ package org.qubiclite.qlite.oracle;
 import org.qubiclite.qlite.constants.TangleJSONConstants;
 import org.qubiclite.qlite.iam.IAMIndex;
 import org.qubiclite.qlite.iam.IAMWriter;
-import org.qubiclite.qlite.oracle.input.provider.OracleInputProvider;
+import org.qubiclite.qlite.oracle.input.OracleInputProvider;
 import org.qubiclite.qlite.oracle.statements.*;
 import org.qubiclite.qlite.oracle.statements.hash.HashStatement;
 import org.qubiclite.qlite.oracle.statements.hash.HashStatementIAMIndex;

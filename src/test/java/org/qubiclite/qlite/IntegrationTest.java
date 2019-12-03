@@ -2,13 +2,12 @@ package org.qubiclite.qlite;
 
 import org.qubiclite.qlite.constants.TangleJSONConstants;
 import org.qubiclite.qlite.oracle.*;
-import org.qubiclite.qlite.oracle.input.config.LogfileInputConfig;
-import org.qubiclite.qlite.oracle.input.config.ValueType;
-import org.qubiclite.qlite.oracle.input.provider.LogfileInputProvider;
-import org.qubiclite.qlite.oracle.input.provider.OracleInputProvider;
 import org.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.qubiclite.qlite.oracle.input.QueueInputProvider;
+import org.qubiclite.qlite.oracle.input.QueueInputProviderConfig;
+import org.qubiclite.qlite.oracle.input.ValueType;
 import org.qubiclite.qlite.qlvm.InterQubicResultFetcher;
 import org.qubiclite.qlite.qubic.EditableQubicSpecification;
 import org.qubiclite.qlite.qubic.QubicReader;
@@ -19,11 +18,7 @@ import org.qubiclite.qlite.tangle.QubicPromotion;
 import org.qubiclite.qlite.tangle.TangleAPI;
 import org.qubiclite.qlite.tangle.TryteTool;
 
-import java.io.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class IntegrationTest {
 
@@ -37,11 +32,11 @@ public class IntegrationTest {
         String rootAddressForTest = TangleAPI.getInstance().getNextUnspentAddressFromSeed(TryteTool.TEST_SEED);
         LOGGER.info(rootAddressForTest);
 
-        int secondsToExecutionStart = 40;
-        int secondsUntilAssemble = 30;
-        int secondsResultPeriod = 15;
-        int secondsHashPeriod = 15;
-        int secondsRuntimeLimit = 5;
+        int secondsToExecutionStart = 120;
+        int secondsUntilAssemble = 90;
+        int secondsResultPeriod = 30;
+        int secondsHashPeriod = 30;
+        int secondsRuntimeLimit = 10;
 
         LOGGER.info("Create Qubic");
         QubicWriter qubicWriter = new QubicWriter(rootAddressForTest);
@@ -64,8 +59,12 @@ public class IntegrationTest {
         qubicWriter.promote(rootAddressForTest, keyword);
         Thread.sleep(3000);
 
-        List<OracleManager> oracleManagers = new ArrayList<>();
-        for (int i = 1; i <= 3; i++) {
+        List<Queue<String>> oracleInputSequences = new ArrayList<>();
+        oracleInputSequences.add(new LinkedList<>(Arrays.asList("50", "4", "3", "1", "20", "55")));
+        oracleInputSequences.add(new LinkedList<>(Arrays.asList("45", "49", "2", "1", "3", "60")));
+        oracleInputSequences.add(new LinkedList<>(Arrays.asList("47", "43", "11", "0", "15", "61")));
+
+        for (int i = 0; i < 3; i++) {
             LOGGER.info("Find promoted Qubic");
             List<String> promotedQubics = QubicPromotion.GetQubicAddressesByKeyword(keyword);
 
@@ -80,23 +79,14 @@ public class IntegrationTest {
                 continue;
             }
 
-            Path inputLogfilePath = Paths.get("src/test/res/InputLogfile" + i + ".log");
-            LOGGER.info("Create Input Logfile: " + inputLogfilePath.toAbsolutePath().toString());
-            createLogfile(inputLogfilePath, Arrays.asList("50", "41", "55"));
-
-            LOGGER.info("Configure Oracle's external input");
-            LogfileInputConfig inputConfig = new LogfileInputConfig(
-                    ValueType.INTEGER,
-                    inputLogfilePath,
-                    Pattern.compile("(.*)"));
-
-            OracleInputProvider inputProvider = new LogfileInputProvider(inputConfig);
-
             LOGGER.info("Create Oracle " + i);
-            OracleWriter oracleWriter = new OracleWriter(rootAddressForTest, qubicReader, inputProvider);
+            OracleWriter oracleWriter = new OracleWriter(
+                    rootAddressForTest,
+                    qubicReader,
+                    new QueueInputProvider(new QueueInputProviderConfig(ValueType.INTEGER, oracleInputSequences.get(i))));
+
             LOGGER.info("Oracle ID (IAM Identity): " + oracleWriter.getID());
             OracleManager oracleManager = new OracleManager(oracleWriter, "OracleManager" + i);
-            oracleManagers.add(oracleManager);
             LOGGER.info("Start Oracle Lifecycle");
             oracleManager.start();
         }
@@ -126,7 +116,7 @@ public class IntegrationTest {
             LOGGER.info("Oracle Part of Assembly: " + oracleId);
         }
 
-        for (int epoch = 0; epoch < 10; epoch++) {
+        for (int epoch = 0; epoch < 12; epoch++) {
             LOGGER.info("Waiting for Epoch " + epoch + " to complete");
             while (qubicReader.lastCompletedEpoch() < epoch) {
                 Thread.sleep(1000);
@@ -144,19 +134,6 @@ public class IntegrationTest {
             LOGGER.info("EPOCH: " + epoch +
                     ", RESULT: " + quorumBasedResult.getResult() +
                     ", QUORUM: "  +  quorum + " / " + quorumMax + " ("+percentage+"%)" );
-        }
-    }
-
-    private static void createLogfile(Path argsFilePath, List<String> argsList) {
-        File argsFile = argsFilePath.toFile();
-        if (argsFile.exists()) {
-            argsFile.delete();
-        }
-
-        try (PrintWriter out = new PrintWriter(argsFilePath.toFile())) {
-            argsList.forEach(out::println);
-        } catch (IOException e) {
-            LOGGER.error("Could not create new argsfile", e);
         }
     }
 }

@@ -1,7 +1,7 @@
 package org.qubiclite.qlite.qlvm;
 
 import org.qubiclite.qlite.constants.GeneralConstants;
-import org.qubiclite.qlite.oracle.input.provider.OracleInputProvider;
+import org.qubiclite.qlite.oracle.input.OracleInputProvider;
 import org.json.JSONArray;
 import org.qubiclite.qlite.oracle.OracleWriter;
 import org.json.JSONObject;
