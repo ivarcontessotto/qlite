@@ -8,9 +8,6 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="com.jayway.jsonpath" level="info">
-            <AppenderRef ref="Console"/>
-        </Logger>
         <Root level="info">
             <AppenderRef ref="Console" />
         </Root>
