@@ -6,7 +6,7 @@ import org.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.qubiclite.qlite.oracle.input.QueueInputProvider;
-import org.qubiclite.qlite.oracle.input.QueueInputProviderConfig;
+import org.qubiclite.qlite.oracle.input.QueueInputConfig;
 import org.qubiclite.qlite.oracle.input.ValueType;
 import org.qubiclite.qlite.qlvm.InterQubicResultFetcher;
 import org.qubiclite.qlite.qubic.EditableQubicSpecification;
@@ -83,7 +83,7 @@ public class IntegrationTest {
             OracleWriter oracleWriter = new OracleWriter(
                     rootAddressForTest,
                     qubicReader,
-                    new QueueInputProvider(new QueueInputProviderConfig(ValueType.INTEGER, oracleInputSequences.get(i))));
+                    new QueueInputProvider(new QueueInputConfig(ValueType.INTEGER, oracleInputSequences.get(i))));
 
             LOGGER.info("Oracle ID (IAM Identity): " + oracleWriter.getID());
             OracleManager oracleManager = new OracleManager(oracleWriter, "OracleManager" + i);

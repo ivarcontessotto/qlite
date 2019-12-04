@@ -8,10 +8,10 @@ import java.util.Queue;
  */
 public class QueueInputProvider implements OracleInputProvider {
 
-    private QueueInputProviderConfig config;
+    private QueueInputConfig config;
     private Queue<String> inputSequence;
 
-    public QueueInputProvider(QueueInputProviderConfig config) {
+    public QueueInputProvider(QueueInputConfig config) {
         this.config = config;
         this.inputSequence = config.getInputSequence();
     }

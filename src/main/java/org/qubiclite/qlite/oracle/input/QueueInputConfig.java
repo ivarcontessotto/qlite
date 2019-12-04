@@ -6,11 +6,11 @@ import java.util.Queue;
 /**
  * Config for the Queue Input Provider.
  */
-public class QueueInputProviderConfig extends OracleInputConfig {
+public class QueueInputConfig extends OracleInputConfig {
 
     private Queue<String> inputSequence;
 
-    public QueueInputProviderConfig(ValueType valueType, Queue<String> inputSequence) {
+    public QueueInputConfig(ValueType valueType, Queue<String> inputSequence) {
         super(valueType);
         this.inputSequence = inputSequence;
     }
