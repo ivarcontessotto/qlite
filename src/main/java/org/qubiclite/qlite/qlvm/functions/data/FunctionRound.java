@@ -6,7 +6,7 @@ import org.qubiclite.qlite.qlvm.functions.Function;
 public class FunctionRound extends Function {
 
     @Override
-    public String getName() { return "round_value"; }
+    public String getName() { return "round"; }
 
     @Override
     public String call(QLVM qlvm, String[] par) {
