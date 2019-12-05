@@ -4,6 +4,7 @@ import org.qubiclite.qlite.constants.GeneralConstants;
 import org.qubiclite.qlite.qlvm.exceptions.runtime.QLValueMaxLengthExceeded;
 import org.qubiclite.qlite.qlvm.exceptions.runtime.UnknownFunctionException;
 import org.qubiclite.qlite.qlvm.functions.*;
+import org.qubiclite.qlite.qlvm.functions.data.FunctionRound;
 import org.qubiclite.qlite.qlvm.functions.data.FunctionSizeOf;
 import org.qubiclite.qlite.qlvm.functions.data.FunctionType;
 import org.qubiclite.qlite.qlvm.functions.input.FunctionGetInput;
@@ -32,6 +33,7 @@ public final class FunctionCall {
         new FunctionSubstr(),
         new FunctionHash(),
         new FunctionGetInput(),
+        new FunctionRound()
     };
 
     private FunctionCall() {}
