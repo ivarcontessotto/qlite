@@ -1,5 +1,8 @@
 package org.qubiclite.qlite.oracle.input;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Queue;
 
 /**
@@ -10,6 +13,7 @@ public class QueueInputProvider implements OracleInputProvider {
 
     private QueueInputConfig config;
     private Queue<String> inputSequence;
+    private final Logger logger = LogManager.getLogger(QueueInputProvider.class);
 
     public QueueInputProvider(QueueInputConfig config) {
         this.config = config;
@@ -26,6 +30,8 @@ public class QueueInputProvider implements OracleInputProvider {
         if (this.inputSequence.size() == 0) {
             this.inputSequence = this.config.getInputSequence();
         }
-        return this.inputSequence.poll();
+        String latestInput = this.inputSequence.poll();
+        this.logger.info("getInput: " + latestInput);
+        return latestInput;
     }
 }
