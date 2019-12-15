@@ -32,8 +32,8 @@ public class IntegrationTest {
         String rootAddressForTest = TangleAPI.getInstance().getNextUnspentAddressFromSeed(TryteTool.TEST_SEED);
         LOGGER.info(rootAddressForTest);
 
-        int secondsToExecutionStart = 120;
-        int secondsUntilAssemble = 90;
+        int secondsToExecutionStart = 180;
+        int secondsUntilAssemble = 120;
         int secondsResultPeriod = 30;
         int secondsHashPeriod = 30;
         int secondsRuntimeLimit = 10;
@@ -45,8 +45,8 @@ public class IntegrationTest {
         specification.setResultPeriodDuration(secondsResultPeriod);
         specification.setHashPeriodDuration(secondsHashPeriod);
         specification.setRuntimeLimit(secondsRuntimeLimit);
-//        specification.setCode("kmh=GetInput();(kmh<=10){traffic='stau';}else{traffic='normal';}return(traffic);");
-        specification.setCode("rawTemp=GetInput();roundedTemp=Round(rawTemp);return(roundedTemp);");
+        specification.setCode("kmh=GetInput();if(kmh<=10){traffic='stau';}else{traffic='normal';}return(traffic);");
+//        specification.setCode("rawTemp=GetInput();roundedTemp=Round(rawTemp);return(roundedTemp);");
 
         LOGGER.info("Publish Qubic Transaction to Tangle Address: " + rootAddressForTest);
         qubicWriter.publishQubicTransaction();
@@ -60,9 +60,9 @@ public class IntegrationTest {
         Thread.sleep(3000);
 
         List<Queue<String>> oracleInputSequences = new ArrayList<>();
-        oracleInputSequences.add(new LinkedList<>(Arrays.asList("10.8", "4.0", "3.1", "1.5", "20.8", "55.6")));
-//        oracleInputSequences.add(new LinkedList<>(Arrays.asList("45", "49", "2", "1", "3", "60")));
-//        oracleInputSequences.add(new LinkedList<>(Arrays.asList("47", "43", "11", "0", "15", "61")));
+        oracleInputSequences.add(new LinkedList<>(Arrays.asList("11", "4", "3", "2", "20", "55")));
+        oracleInputSequences.add(new LinkedList<>(Arrays.asList("45", "49", "2", "1", "3", "60")));
+        oracleInputSequences.add(new LinkedList<>(Arrays.asList("47", "43", "11", "0", "15", "61")));
 
         for (int i = 0; i < 3; i++) {
             LOGGER.info("Find promoted Qubic");
@@ -83,7 +83,7 @@ public class IntegrationTest {
             OracleWriter oracleWriter = new OracleWriter(
                     rootAddressForTest,
                     qubicReader,
-                    new QueueInputProvider(new QueueInputConfig(ValueType.DOUBLE, oracleInputSequences.get(i))));
+                    new QueueInputProvider(new QueueInputConfig(ValueType.INTEGER, oracleInputSequences.get(i))));
 
             LOGGER.info("Oracle ID (IAM Identity): " + oracleWriter.getID());
             OracleManager oracleManager = new OracleManager(oracleWriter, "OracleManager" + i);
